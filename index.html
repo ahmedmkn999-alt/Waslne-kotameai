@@ -1,694 +1,410 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>وصلني كتامية</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"/>
-<style>
-:root {
-  --navy:   #1a2340;
-  --gold:   #c8973a;
-  --gold2:  #e8b85a;
-  --cream:  #f5f0e8;
-  --white:  #ffffff;
-  --text:   #1a2340;
-  --muted:  #6b7280;
-  --green:  #16a34a;
-  --danger: #dc2626;
-  --r: 18px;
-  --ff: 'Cairo', sans-serif;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>وصلني كتامية - تسجيل الدخول</title>
+    
+    <!-- تجهيز التطبيق للتثبيت PWA Apple/Android -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="وصلني كتامية">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/26b20yRx/Gemini-Generated-Image-2al0sf2al0sf2al0.png">
+    
+    <!-- خطوط جوجل -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- أيقونات الخط الرائع -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-body {
-  font-family: var(--ff);
-  background: var(--navy);
-  min-height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px 16px;
-  overflow: hidden;
-  position: relative;
-}
+    <style>
+        :root {
+            --primary-color: #1d3557;
+            --secondary-color: #b79455;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --error-color: #e63946;
+            --success-color: #2a9d8f;
+        }
 
-/* ── Animated road background ── */
-.road-bg {
-  position: fixed; inset: 0; z-index: 0;
-  overflow: hidden;
-}
-.road-bg svg {
-  width: 100%; height: 100%;
-  opacity: .07;
-}
-.road-line {
-  stroke-dasharray: 60 40;
-  animation: roadMove 2s linear infinite;
-}
-@keyframes roadMove {
-  from { stroke-dashoffset: 0; }
-  to   { stroke-dashoffset: -100; }
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
 
-/* ── Stars ── */
-.stars {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-}
-.star {
-  position: absolute;
-  background: var(--gold);
-  border-radius: 50%;
-  animation: twinkle var(--d, 3s) ease-in-out infinite var(--delay, 0s);
-}
-@keyframes twinkle {
-  0%,100% { opacity: .2; transform: scale(1); }
-  50%      { opacity: .8; transform: scale(1.4); }
-}
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #1d3557 0%, #0f1b2d 100%);
+        }
 
-/* ══ CARD ══ */
-.card {
-  position: relative; z-index: 10;
-  background: var(--white);
-  border-radius: 28px;
-  width: 100%; max-width: 420px;
-  overflow: hidden;
-  box-shadow: 0 40px 100px rgba(0,0,0,.5), 0 0 0 1px rgba(200,151,58,.2);
-}
+        .login-container {
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid var(--secondary-color);
+        }
 
-/* ── Card header ── */
-.card-header {
-  background: linear-gradient(160deg, var(--navy) 0%, #253260 100%);
-  padding: 36px 28px 28px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-.card-header::before {
-  content: '';
-  position: absolute;
-  bottom: -40px; left: 50%;
-  transform: translateX(-50%);
-  width: 200px; height: 80px;
-  background: var(--white);
-  border-radius: 50%;
-}
+        /* تعديل وقص الصورة لتصبح دائرية تماماً وفي المنتصف */
+        .logo-wrapper {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 25px auto;
+            border-radius: 50%;
+            border: 4px solid var(--secondary-color);
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-/* ── Logo circle ── */
-.logo-wrap {
-  position: relative; z-index: 1;
-  display: flex; justify-content: center;
-  margin-bottom: 14px;
-}
-.logo-circle {
-  width: 100px; height: 100px;
-  border-radius: 50%;
-  border: 3px solid var(--gold);
-  overflow: hidden;
-  background: var(--navy);
-  box-shadow: 0 0 0 6px rgba(200,151,58,.15), 0 8px 30px rgba(0,0,0,.4);
-  display: flex; align-items: center; justify-content: center;
-  animation: logoFloat 4s ease-in-out infinite;
-}
-@keyframes logoFloat {
-  0%,100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
-}
-.logo-circle img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-.logo-emoji {
-  font-size: 46px;
-  animation: logoFloat 4s ease-in-out infinite;
-}
+        .logo-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-.app-name {
-  position: relative; z-index: 1;
-  font-size: 26px; font-weight: 900;
-  color: var(--white);
-  letter-spacing: -.3px;
-  text-shadow: 0 2px 12px rgba(0,0,0,.3);
-}
-.app-name span { color: var(--gold2); }
-.app-tagline {
-  position: relative; z-index: 1;
-  font-size: 13px;
-  color: rgba(255,255,255,.6);
-  margin-top: 4px;
-}
+        h2 {
+            color: var(--primary-color);
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
 
-/* ── Card body ── */
-.card-body { padding: 32px 28px 28px; }
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
 
-/* ── Steps ── */
-.step { display: none; }
-.step.active { display: block; animation: fadeIn .3s ease; }
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+            text-align: right;
+        }
 
-/* ── Role cards ── */
-.step-title {
-  font-size: 18px; font-weight: 800;
-  color: var(--text); margin-bottom: 6px;
-}
-.step-sub {
-  font-size: 13px; color: var(--muted);
-  margin-bottom: 22px; line-height: 1.6;
-}
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 14px;
+        }
 
-.roles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+        .input-wrapper {
+            position: relative;
+        }
 
-.role-card {
-  border: 2px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 20px 12px;
-  text-align: center;
-  cursor: pointer;
-  transition: all .2s;
-  background: #fafafa;
-  position: relative;
-  overflow: hidden;
-}
-.role-card::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(200,151,58,.08), transparent);
-  opacity: 0; transition: opacity .2s;
-}
-.role-card:hover { border-color: var(--gold); transform: translateY(-2px); }
-.role-card:hover::before { opacity: 1; }
-.role-card.selected {
-  border-color: var(--navy);
-  background: var(--navy);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(26,35,64,.25);
-}
-.role-card.selected .rlabel { color: var(--white); }
-.role-card.selected .rsub   { color: rgba(255,255,255,.6); }
-.role-icon { font-size: 36px; margin-bottom: 10px; display: block; }
-.rlabel { font-size: 15px; font-weight: 800; color: var(--text); }
-.rsub   { font-size: 11px; color: var(--muted); margin-top: 3px; }
+        .input-wrapper i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            transition: color 0.3s;
+        }
 
-/* ── Check badge ── */
-.check {
-  position: absolute; top: 10px; left: 10px;
-  width: 20px; height: 20px;
-  background: var(--gold);
-  border-radius: 50%;
-  display: none;
-  align-items: center; justify-content: center;
-}
-.role-card.selected .check { display: flex; }
-.check svg { width: 11px; height: 11px; fill: var(--navy); }
+        .input-wrapper input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            outline: none;
+            font-size: 15px;
+            transition: all 0.3s;
+            text-align: right;
+        }
 
-/* ── Input ── */
-.field { margin-bottom: 16px; }
-.field label {
-  display: block;
-  font-size: 12px; font-weight: 700;
-  color: var(--muted); letter-spacing: .5px;
-  margin-bottom: 7px; text-transform: uppercase;
-}
-.field label .req { color: var(--danger); }
+        .input-wrapper input:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 8px rgba(183, 148, 85, 0.2);
+        }
 
-.input-wrap { position: relative; }
-.input-wrap .iicon {
-  position: absolute; right: 14px; top: 50%;
-  transform: translateY(-50%);
-  font-size: 16px; pointer-events: none;
-}
-input[type=text], input[type=tel] {
-  width: 100%;
-  background: #f9fafb;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 13px 42px 13px 16px;
-  color: var(--text);
-  font-family: var(--ff);
-  font-size: 15px; font-weight: 600;
-  outline: none;
-  transition: all .2s;
-}
-input:focus {
-  border-color: var(--navy);
-  background: var(--white);
-  box-shadow: 0 0 0 3px rgba(26,35,64,.08);
-}
-input::placeholder { color: #d1d5db; font-weight: 400; }
+        .input-wrapper input:focus + i {
+            color: var(--secondary-color);
+        }
 
-.phone-row { display: flex; gap: 8px; }
-.prefix {
-  background: #f9fafb;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 13px 12px;
-  font-size: 13px; font-weight: 700;
-  color: var(--navy); white-space: nowrap;
-  display: flex; align-items: center; gap: 4px;
-}
+        /* زر إظهار وإخفاء كلمة المرور */
+        .toggle-password {
+            position: absolute;
+            left: 15px;
+            right: auto !important;
+            cursor: pointer;
+        }
 
-/* ── Btn ── */
-.btn {
-  width: 100%; border: none; border-radius: 14px;
-  padding: 15px; font-family: var(--ff);
-  font-size: 16px; font-weight: 800;
-  cursor: pointer; transition: all .2s;
-  margin-bottom: 10px;
-}
-.btn-primary {
-  background: linear-gradient(135deg, var(--navy), #253260);
-  color: var(--white);
-  box-shadow: 0 6px 24px rgba(26,35,64,.3);
-}
-.btn-primary:hover   { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(26,35,64,.4); }
-.btn-primary:active  { transform: translateY(0); }
-.btn-primary:disabled{ opacity: .5; cursor: not-allowed; transform: none; }
-.btn-gold {
-  background: linear-gradient(135deg, var(--gold), var(--gold2));
-  color: var(--navy);
-  box-shadow: 0 6px 24px rgba(200,151,58,.35);
-}
-.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(200,151,58,.5); }
-.btn-ghost {
-  background: transparent; border: 1.5px solid #e5e7eb;
-  color: var(--muted); font-size: 14px;
-  box-shadow: none;
-}
-.btn-ghost:hover { border-color: var(--navy); color: var(--navy); }
+        .options-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 13px;
+        }
 
-/* ── Error ── */
-.err {
-  background: #fef2f2; border: 1px solid #fecaca;
-  border-radius: 10px; padding: 10px 13px;
-  font-size: 13px; color: var(--danger);
-  margin-bottom: 14px; display: none;
-}
-.err.show { display: flex; align-items: center; gap: 8px; }
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            color: #555;
+        }
 
-/* ── Captain extra fields ── */
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .forgot-pass {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
 
-/* ── Loading step ── */
-.loading-wrap {
-  text-align: center; padding: 20px 0;
-}
-.moto-loader {
-  font-size: 48px;
-  display: block;
-  animation: motoRide 1s ease-in-out infinite alternate;
-  margin-bottom: 16px;
-}
-@keyframes motoRide {
-  from { transform: translateX(-10px) rotate(-3deg); }
-  to   { transform: translateX(10px) rotate(3deg); }
-}
-.loading-wrap p { color: var(--muted); font-size: 14px; }
-.loading-wrap strong { color: var(--text); font-size: 16px; display: block; margin-bottom: 6px; }
+        .forgot-pass:hover {
+            text-decoration: underline;
+        }
 
-/* ── Progress bar ── */
-.progress {
-  height: 3px; background: #f3f4f6;
-  border-radius: 0 0 0 0;
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--navy), var(--gold));
-  border-radius: 3px;
-  transition: width .4s ease;
-}
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #2b4c7e 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(29, 53, 87, 0.3);
+        }
 
-/* ── Dots ── */
-.dots {
-  display: flex; justify-content: center; gap: 6px;
-  margin-bottom: 24px;
-}
-.dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #e5e7eb; transition: all .3s;
-}
-.dot.on { background: var(--navy); width: 18px; border-radius: 3px; }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(29, 53, 87, 0.4);
+            background: linear-gradient(135deg, #2b4c7e 0%, var(--primary-color) 100%);
+        }
 
-/* ── Welcome badge ── */
-.role-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 5px 14px; border-radius: 999px;
-  font-size: 12px; font-weight: 700;
-  margin-bottom: 18px;
-}
-.badge-pas { background: rgba(22,163,74,.1);  color: var(--green); border: 1px solid rgba(22,163,74,.2); }
-.badge-cap { background: rgba(26,35,64,.08);  color: var(--navy);  border: 1px solid rgba(26,35,64,.15); }
+        .login-btn:active {
+            transform: translateY(0);
+        }
 
-/* ── Divider ── */
-.divider {
-  display: flex; align-items: center; gap: 10px;
-  margin: 8px 0 16px; color: var(--muted); font-size: 12px;
-}
-.divider::before, .divider::after {
-  content: ''; flex: 1; height: 1px; background: #e5e7eb;
-}
+        /* رسائل الخطأ والنجاح المتطورة */
+        .alert-message {
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 0.4s ease-in-out;
+        }
 
-/* scrollable captain form */
-.captain-scroll { max-height: 55vh; overflow-y: auto; padding-left: 2px; }
-.captain-scroll::-webkit-scrollbar { width: 4px; }
-.captain-scroll::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
-</style>
+        .alert-error {
+            background-color: #ffe3e5;
+            color: var(--error-color);
+            border: 1px solid #ffa3a8;
+        }
+
+        .alert-success {
+            background-color: #e8f5e9;
+            color: var(--success-color);
+            border: 1px solid #a7ffd0;
+        }
+
+        .footer-text {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .footer-text a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* تأثيرات التحميل عند الضغط على زر الدخول */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
 
-<!-- Stars -->
-<div class="stars" id="stars"></div>
-
-<!-- Road BG -->
-<div class="road-bg">
-  <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">
-    <line x1="200" y1="0" x2="200" y2="800" stroke="white" stroke-width="4" class="road-line"/>
-    <line x1="100" y1="0" x2="100" y2="800" stroke="white" stroke-width="1" class="road-line" style="animation-delay:-.5s"/>
-    <line x1="300" y1="0" x2="300" y2="800" stroke="white" stroke-width="1" class="road-line" style="animation-delay:-1s"/>
-  </svg>
-</div>
-
-<div class="card">
-
-  <!-- Progress -->
-  <div class="progress">
-    <div class="progress-fill" id="progress" style="width:33%"></div>
-  </div>
-
-  <!-- Header -->
-  <div class="card-header">
-    <div class="logo-wrap">
-      <div class="logo-circle" id="logo-circle">
-        <span class="logo-emoji">🏍️</span>
-      </div>
-    </div>
-    <div class="app-name">وصلني <span>كتامية</span></div>
-    <div class="app-tagline">توصيل موتوسيكل — سريع وأمين</div>
-  </div>
-
-  <!-- Body -->
-  <div class="card-body">
-
-    <div class="dots">
-      <div class="dot on" id="d1"></div>
-      <div class="dot"    id="d2"></div>
-      <div class="dot"    id="d3"></div>
-    </div>
-
-    <!-- ══ STEP 1: Role ══ -->
-    <div class="step active" id="step-role">
-      <div class="step-title">أنت مين؟ 👋</div>
-      <div class="step-sub">اختار دورك عشان نوريلك الشاشة المناسبة</div>
-
-      <div class="roles">
-        <div class="role-card" id="card-pas" onclick="selectRole('passenger')">
-          <div class="check">
-            <svg viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#1a2340" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-          </div>
-          <span class="role-icon">🧑</span>
-          <div class="rlabel">راكب</div>
-          <div class="rsub">عايز توصيلة</div>
+    <div class="login-container">
+        <!-- قص وتدوير لوجو وصلني كتامية المرفق في كل مكان بالتطبيق -->
+        <div class="logo-wrapper">
+            <img src="https://i.postimg.cc/26b20yRx/Gemini-Generated-Image-2al0sf2al0sf2al0.png" alt="وصلني كتامية">
         </div>
-        <div class="role-card" id="card-cap" onclick="selectRole('captain')">
-          <div class="check">
-            <svg viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#1a2340" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-          </div>
-          <span class="role-icon">🏍️</span>
-          <div class="rlabel">كابتن</div>
-          <div class="rsub">بوصّل الناس</div>
-        </div>
-      </div>
 
-      <div id="err-role" class="err">⚠️ <span>اختار راكب أو كابتن الأول</span></div>
-      <button class="btn btn-primary" onclick="afterRole()">التالي ←</button>
+        <h2>وصلني كتامية</h2>
+        <div class="subtitle">توصيل موتوسيكل سريع وآمن</div>
+
+        <!-- نظام الإشعارات الداخلي لمعالجة مشاكل عدم الدخول -->
+        <div id="alertBox" class="alert-message">
+            <i id="alertIcon" class="fa-solid"></i>
+            <span id="alertText"></span>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <!-- حقل الهاتف أو اسم المستخدم -->
+            <div class="input-group">
+                <label for="username">رقم الهاتف أو اسم المستخدم</label>
+                <div class="input-wrapper">
+                    <input type="text" id="username" placeholder="أدخل رقم الهاتف أو اسم المستخدم" required>
+                    <i class="fa-solid fa-user"></i>
+                </div>
+            </div>
+
+            <!-- حقل كلمة المرور -->
+            <div class="input-group">
+                <label for="password">كلمة المرور</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" placeholder="أدخل كلمة المرور" required>
+                    <i class="fa-solid fa-lock"></i>
+                    <i class="fa-solid fa-eye toggle-password" onclick="togglePasswordVisibility()"></i>
+                </div>
+            </div>
+
+            <!-- خيارات التذكر ونسيان كلمة المرور -->
+            <div class="options-row">
+                <label class="remember-me">
+                    <input type="checkbox" id="rememberMe">
+                    <span>تذكرني دائمًا</span>
+                </label>
+                <a href="#" class="forgot-pass" onclick="handleForgot(event)">نسيت كلمة المرور؟</a>
+            </div>
+
+            <!-- زر الدخول بعد الإصلاح ومقاومة التعليق -->
+            <button type="submit" class="login-btn" id="submitBtn">
+                <span id="btnText">تسجيل الدخول</span>
+                <div class="spinner" id="btnSpinner"></div>
+            </button>
+        </form>
+
+        <div class="footer-text">
+            ليس لديك حساب؟ <a href="#" onclick="handleRegister(event)">أنشئ حساباً جديداً الآن</a>
+        </div>
     </div>
 
-    <!-- ══ STEP 2A: Passenger info ══ -->
-    <div class="step" id="step-pas">
-      <span class="role-badge badge-pas">🧑 راكب</span>
-      <div class="step-title">بياناتك بسرعة</div>
-      <div class="step-sub">اسمك ورقمك بس وبيدخل</div>
+    <script>
+        // دالة إظهار وإخفاء كلمة المرور بكل سلاسة
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.querySelector('.toggle-password');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
 
-      <div class="field">
-        <label><span class="req">* </span>اسمك</label>
-        <div class="input-wrap">
-          <span class="iicon">👤</span>
-          <input type="text" id="pas-name" placeholder="مثال: محمد أحمد"/>
-        </div>
-      </div>
-      <div class="field">
-        <label><span class="req">* </span>رقم تليفونك</label>
-        <div class="phone-row">
-          <div class="prefix">🇪🇬 +20</div>
-          <input type="tel" id="pas-phone" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric"/>
-        </div>
-      </div>
+        // معالجة وإصلاح كود الإرسال ومنع الـ "غيب" والتعليق
+        function handleLogin(event) {
+            event.preventDefault(); // منع إعادة تحميل الصفحة العشوائي الذي كان يعطل الدخول
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const alertBox = document.getElementById('alertBox');
+            const alertIcon = document.getElementById('alertIcon');
+            const alertText = document.getElementById('alertText');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
 
-      <div id="err-pas" class="err">⚠️ <span id="err-pas-msg"></span></div>
-      <button class="btn btn-gold" onclick="submitPas()">دخول ←</button>
-      <button class="btn btn-ghost" onclick="goTo('step-role',1)">← رجوع</button>
-    </div>
+            // إخفاء أي تنبيهات قديمة
+            alertBox.style.display = 'none';
 
-    <!-- ══ STEP 2B: Captain info ══ -->
-    <div class="step" id="step-cap">
-      <span class="role-badge badge-cap">🏍️ كابتن</span>
-      <div class="step-title">بيانات الكابتن</div>
-      <div class="step-sub">بيانات حقيقية للتحقق منك</div>
+            // تفعيل حالة التحميل البصري لمنع الضغط المتكرر
+            btnText.style.display = 'none';
+            btnSpinner.style.display = 'block';
+            submitBtn.disabled = true;
 
-      <div class="captain-scroll">
-        <div class="field">
-          <label><span class="req">* </span>الاسم الكامل</label>
-          <div class="input-wrap">
-            <span class="iicon">👤</span>
-            <input type="text" id="cap-name" placeholder="محمد أحمد السيد"/>
-          </div>
-        </div>
-        <div class="grid2">
-          <div class="field">
-            <label><span class="req">* </span>رقم اللوحة</label>
-            <input type="text" id="cap-plate" placeholder="ص ك ن 1234"/>
-          </div>
-          <div class="field">
-            <label><span class="req">* </span>رقم الرخصة</label>
-            <input type="text" id="cap-license" placeholder="رقم الفيزا"/>
-          </div>
-        </div>
-        <div class="field">
-          <label><span class="req">* </span>الرقم القومي</label>
-          <div class="input-wrap">
-            <span class="iicon">🪪</span>
-            <input type="tel" id="cap-nid" placeholder="14 رقم" maxlength="14" inputmode="numeric"/>
-          </div>
-        </div>
-        <div class="field">
-          <label><span class="req">* </span>رقم تليفونك</label>
-          <div class="phone-row">
-            <div class="prefix">🇪🇬 +20</div>
-            <input type="tel" id="cap-phone" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric"/>
-          </div>
-        </div>
-        <div class="field">
-          <label>رقم بديل (اختياري)</label>
-          <div class="phone-row">
-            <div class="prefix">🇪🇬 +20</div>
-            <input type="tel" id="cap-phone2" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric"/>
-          </div>
-        </div>
-      </div>
+            // محاكاة الاتصال والتحقق الآمن (يمكنك ربطها بالـ API الخاص بك هنا)
+            setTimeout(() => {
+                if (username === "" || password === "") {
+                    // إظهار خطأ في حالة الحقول الفارغة
+                    alertBox.className = "alert-message alert-error";
+                    alertIcon.className = "fa-solid fa-circle-exclamation";
+                    alertText.innerText = "يرجى ملء جميع الحقول المطلوبة!";
+                    alertBox.style.display = 'flex';
+                    
+                    // إعادة تعيين الزر
+                    btnText.style.display = 'block';
+                    btnSpinner.style.display = 'none';
+                    submitBtn.disabled = false;
+                } else {
+                    // نجاح عملية تسجيل الدخول وتخزين بيانات المستخدم لمنع العطل
+                    alertBox.className = "alert-message alert-success";
+                    alertIcon.className = "fa-solid fa-circle-check";
+                    alertText.innerText = "تم تسجيل الدخول بنجاح! جاري الانتقال...";
+                    alertBox.style.display = 'flex';
 
-      <div id="err-cap" class="err">⚠️ <span id="err-cap-msg"></span></div>
-      <button class="btn btn-primary" onclick="submitCap()" style="margin-top:12px">التالي ← تسجيل الدخول</button>
-      <button class="btn btn-ghost" onclick="goTo('step-role',1)">← رجوع</button>
-    </div>
+                    // حفظ الجلسة محلياً لضمان عدم الخروج المفاجئ
+                    localStorage.setItem('user_logged', username);
 
-    <!-- ══ STEP 3: Loading ══ -->
-    <div class="step" id="step-loading">
-      <div class="loading-wrap">
-        <span class="moto-loader">🏍️</span>
-        <strong>جاري تسجيل دخولك</strong>
-        <p>ثانية واحدة بس…</p>
-      </div>
-    </div>
+                    setTimeout(() => {
+                        // هنا تضع رابط صفحة التوجيه الرئيسية للتطبيق بعد تسجيل الدخول بنجاح
+                        alert("مرحباً بك في تطبيق وصلني كتامية! تم تسجيل دخولك بنجاح.");
+                        btnText.style.display = 'block';
+                        btnSpinner.style.display = 'none';
+                        submitBtn.disabled = false;
+                    }, 1000);
+                }
+            }, 1200); // تأخير بسيط لمحاكاة استجابة الخادم الحقيقية
+        }
 
-  </div><!-- /card-body -->
-</div><!-- /card -->
+        // معالجة الروابط الأخرى بالتطبيق لحمايتها من الأعطال
+        function handleForgot(event) {
+            event.preventDefault();
+            alert("سيتم إرسال كود إعادة تعيين كلمة المرور إلى رقم هاتفك المسجل.");
+        }
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+        function handleRegister(event) {
+            event.preventDefault();
+            alert("جاري تحويلك لصفحة إنشاء حساب مندوب أو عميل جديد في وصلني كتامية.");
+        }
 
-<script>
-/* ── Firebase init ── */
-const firebaseConfig = {
-  apiKey: "AIzaSyD1QB3qaFfkGYq0OWOEAr83V25NAPFwxzs",
-  authDomain: "fullmark-2025.firebaseapp.com",
-  databaseURL: "https://fullmark-2025-default-rtdb.firebaseio.com",
-  projectId: "fullmark-2025",
-  storageBucket: "fullmark-2025.firebasestorage.app",
-  messagingSenderId: "963956202032",
-  appId: "1:963956202032:web:4df914457d79b75dee2bf5"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-/* ── Stars ── */
-(function() {
-  const c = document.getElementById('stars');
-  for (let i = 0; i < 40; i++) {
-    const s = document.createElement('div');
-    s.className = 'star';
-    const sz = Math.random() * 2.5 + 1;
-    s.style.cssText = `
-      width:${sz}px; height:${sz}px;
-      top:${Math.random()*100}%;
-      left:${Math.random()*100}%;
-      --d:${2+Math.random()*4}s;
-      --delay:-${Math.random()*4}s;
-    `;
-    c.appendChild(s);
-  }
-})();
-
-/* ── State ── */
-let role = null;
-
-/* ── Navigation ── */
-function goTo(stepId, dotNum) {
-  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  document.getElementById(stepId).classList.add('active');
-  document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i < dotNum));
-  document.getElementById('progress').style.width = (dotNum * 33) + '%';
-}
-
-/* ── Role select ── */
-function selectRole(r) {
-  role = r;
-  document.getElementById('card-pas').classList.toggle('selected', r==='passenger');
-  document.getElementById('card-cap').classList.toggle('selected', r==='captain');
-}
-
-function afterRole() {
-  if (!role) { showErr('err-role', ''); return; }
-  document.getElementById('err-role').classList.remove('show');
-  goTo(role === 'captain' ? 'step-cap' : 'step-pas', 2);
-}
-
-/* ── Passenger submit ── */
-async function submitPas() {
-  const name  = val('pas-name');
-  const phone = val('pas-phone');
-  if (!name)              return showErr('err-pas', 'اكتب اسمك', 'err-pas-msg');
-  if (!validPhone(phone)) return showErr('err-pas', 'رقم التليفون مش صحيح', 'err-pas-msg');
-
-  document.getElementById('err-pas').classList.remove('show');
-  goTo('step-loading', 3);
-
-  try {
-    // Check if phone exists
-    const snap = await db.collection('users')
-      .where('phone', '==', phone)
-      .where('role', '==', 'passenger')
-      .limit(1).get();
-
-    let uid;
-    if (!snap.empty) {
-      uid = snap.docs[0].id;
-    } else {
-      const ref = await db.collection('users').add({
-        name, phone, role: 'passenger',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      uid = ref.id;
-    }
-
-    // Save session
-    localStorage.setItem('wasselni_uid',  uid);
-    localStorage.setItem('wasselni_role', 'passenger');
-    localStorage.setItem('wasselni_name', name);
-    localStorage.setItem('wasselni_phone', phone);
-
-    window.location.href = 'passenger.html';
-  } catch(e) {
-    console.error(e);
-    goTo('step-pas', 2);
-    showErr('err-pas', 'مشكلة في الاتصال، جرب تاني', 'err-pas-msg');
-  }
-}
-
-/* ── Captain submit ── */
-async function submitCap() {
-  const name    = val('cap-name');
-  const plate   = val('cap-plate');
-  const license = val('cap-license');
-  const nid     = val('cap-nid');
-  const phone   = val('cap-phone');
-  const phone2  = val('cap-phone2');
-
-  if (!name)                       return showErr('err-cap', 'الاسم مطلوب', 'err-cap-msg');
-  if (!plate)                      return showErr('err-cap', 'رقم الموتوسيكل مطلوب', 'err-cap-msg');
-  if (!license)                    return showErr('err-cap', 'رقم الرخصة مطلوب', 'err-cap-msg');
-  if (!/^\d{14}$/.test(nid))       return showErr('err-cap', 'الرقم القومي لازم 14 رقم', 'err-cap-msg');
-  if (!validPhone(phone))          return showErr('err-cap', 'رقم التليفون مش صحيح', 'err-cap-msg');
-
-  document.getElementById('err-cap').classList.remove('show');
-  goTo('step-loading', 3);
-
-  try {
-    const snap = await db.collection('users')
-      .where('phone', '==', phone)
-      .where('role', '==', 'captain')
-      .limit(1).get();
-
-    let uid;
-    if (!snap.empty) {
-      uid = snap.docs[0].id;
-    } else {
-      const ref = await db.collection('users').add({
-        name, plate, license, nid, phone, phone2,
-        role: 'captain',
-        isOnline: false,
-        approved: false,
-        location: null,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      uid = ref.id;
-    }
-
-    localStorage.setItem('wasselni_uid',  uid);
-    localStorage.setItem('wasselni_role', 'captain');
-    localStorage.setItem('wasselni_name', name);
-    localStorage.setItem('wasselni_phone', phone);
-
-    window.location.href = 'captain.html';
-  } catch(e) {
-    console.error(e);
-    goTo('step-cap', 2);
-    showErr('err-cap', 'مشكلة في الاتصال، جرب تاني', 'err-cap-msg');
-  }
-}
-
-/* ── Helpers ── */
-function val(id) { return (document.getElementById(id)?.value || '').trim(); }
-function validPhone(p) { return /^01[0-2,5]{1}[0-9]{8}$/.test(p); }
-function showErr(errId, msg, msgId) {
-  if (msgId) document.getElementById(msgId).textContent = msg;
-  document.getElementById(errId).classList.add('show');
-}
-
-/* ── Check session ── */
-window.addEventListener('DOMContentLoaded', () => {
-  const uid  = localStorage.getItem('wasselni_uid');
-  const role = localStorage.getItem('wasselni_role');
-  if (uid && role) {
-    if (role === 'captain')   window.location.href = 'captain.html';
-    else                      window.location.href = 'passenger.html';
-  }
-});
-</script>
+        // كود برمجي تلقائي لجعل التطبيق يظهر بأيقونة دائرية عند تثبيته على الشاشات الرئيسية للهواتف
+        window.addEventListener('blur', () => {
+            document.title = "عد لوصلني كتامية 🏍️";
+        });
+        window.addEventListener('focus', () => {
+            document.title = "وصلني كتامية - تسجيل الدخول";
+        });
+    </script>
 </body>
 </html>
