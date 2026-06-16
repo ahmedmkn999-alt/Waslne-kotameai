@@ -1,29 +1,40 @@
-const CACHE = 'wasselni-v1';
-const ASSETS = [
+const CACHE_NAME = 'wasselni-v3';
+const urlsToCache = [
+  '/',
   '/index.html',
-  '/passenger.html',
   '/captain.html',
-  '/manifest.json'
+  '/passenger.html',
+  '/index.js',
+  '/captain.js',
+  '/passenger.js',
+  '/manifest.json',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+  'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap'
 ];
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS))
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
   self.skipWaiting();
 });
 
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
+    })
   );
-  self.clients.claim();
 });
 
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
+      );
+    })
   );
+  self.clients.claim();
 });
