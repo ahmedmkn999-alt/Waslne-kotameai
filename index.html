@@ -14,199 +14,213 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --navy: #1a2340;
-    --gold: #c8973a;
-    --gold2: #e8b85a;
-    --white: #ffffff;
-    --muted: #6b7280;
-    --danger: #dc2626;
-    --ff: 'Cairo', sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: var(--ff);
-    background: var(--navy);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .card {
-    background: var(--white);
-    border-radius: 28px;
-    width: 100%;
-    max-width: 420px;
-    overflow: hidden;
-    box-shadow: 0 40px 100px rgba(0,0,0,.5);
-  }
-  .card-header {
-    background: linear-gradient(160deg, var(--navy) 0%, #253260 100%);
-    padding: 36px 28px 28px;
-    text-align: center;
-  }
-  .logo-circle {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    border: 3px solid var(--gold);
-    margin: 0 auto 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--navy);
-    box-shadow: 0 0 0 6px rgba(200,151,58,.15);
-  }
-  .logo-circle span { font-size: 46px; }
-  .app-name {
-    font-size: 26px;
-    font-weight: 900;
-    color: var(--white);
-  }
-  .app-name span { color: var(--gold2); }
-  .app-tagline {
-    font-size: 13px;
-    color: rgba(255,255,255,.6);
-    margin-top: 4px;
-  }
-  .card-body { padding: 32px 28px 28px; }
-  .step { display: none; }
-  .step.active { display: block; animation: fadeIn .3s ease; }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .step-title {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--navy);
-    margin-bottom: 6px;
-  }
-  .step-sub {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 22px;
-  }
-  .roles {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 22px;
-  }
-  .role-card {
-    border: 2px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 20px 12px;
-    text-align: center;
-    cursor: pointer;
-    transition: all .2s;
-    background: #fafafa;
-  }
-  .role-card.selected {
-    border-color: var(--navy);
-    background: var(--navy);
-  }
-  .role-card.selected .rlabel { color: var(--white); }
-  .role-card.selected .rsub { color: rgba(255,255,255,.6); }
-  .role-icon { font-size: 36px; margin-bottom: 10px; display: block; }
-  .rlabel { font-size: 15px; font-weight: 800; color: var(--navy); }
-  .rsub { font-size: 11px; color: var(--muted); margin-top: 3px; }
-  .check {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    width: 20px;
-    height: 20px;
-    background: var(--gold);
-    border-radius: 50%;
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
-  .role-card.selected .check { display: flex; }
-  .field { margin-bottom: 16px; }
-  .field label {
-    display: block;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--muted);
-    margin-bottom: 7px;
-  }
-  input {
-    width: 100%;
-    background: #f9fafb;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 13px 16px;
-    font-family: var(--ff);
-    font-size: 15px;
-    outline: none;
-  }
-  input:focus {
-    border-color: var(--navy);
-    background: var(--white);
-  }
-  .btn {
-    width: 100%;
-    border: none;
-    border-radius: 14px;
-    padding: 15px;
-    font-family: var(--ff);
-    font-size: 16px;
-    font-weight: 800;
-    cursor: pointer;
-    margin-bottom: 10px;
-  }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--navy), #253260);
-    color: var(--white);
-  }
-  .btn-gold {
-    background: linear-gradient(135deg, var(--gold), var(--gold2));
-    color: var(--navy);
-  }
-  .btn-ghost {
-    background: transparent;
-    border: 1.5px solid #e5e7eb;
-    color: var(--muted);
-  }
-  .err {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: 10px;
-    padding: 10px;
-    font-size: 13px;
-    color: var(--danger);
-    margin-bottom: 14px;
-    display: none;
-  }
-  .err.show { display: block; }
-  .progress {
-    height: 3px;
-    background: #f3f4f6;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--navy), var(--gold));
-    transition: width .4s ease;
-  }
-  .dots {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-bottom: 24px;
-  }
-  .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #e5e7eb;
-    transition: all .3s;
-  }
-  .dot.on { background: var(--navy); width: 18px; border-radius: 3px; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .captain-scroll { max-height: 55vh; overflow-y: auto; }
+:root {
+  --navy: #1a2340;
+  --gold: #c8973a;
+  --gold2: #e8b85a;
+  --white: #ffffff;
+  --muted: #6b7280;
+  --danger: #dc2626;
+  --ff: 'Cairo', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--ff);
+  background: var(--navy);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.card {
+  background: var(--white);
+  border-radius: 28px;
+  width: 100%;
+  max-width: 420px;
+  overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0,0,0,.5);
+}
+.card-header {
+  background: linear-gradient(160deg, var(--navy) 0%, #253260 100%);
+  padding: 36px 28px 28px;
+  text-align: center;
+}
+.logo-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid var(--gold);
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--navy);
+  box-shadow: 0 0 0 6px rgba(200,151,58,.15);
+}
+.logo-circle span { font-size: 46px; }
+.app-name {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--white);
+}
+.app-name span { color: var(--gold2); }
+.app-tagline {
+  font-size: 13px;
+  color: rgba(255,255,255,.6);
+  margin-top: 4px;
+}
+.card-body { padding: 32px 28px 28px; }
+.step { display: none; }
+.step.active { display: block; animation: fadeIn .3s ease; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.step-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+.step-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 22px;
+}
+.roles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.role-card {
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 20px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: #fafafa;
+  position: relative;
+}
+.role-card.selected {
+  border-color: var(--navy);
+  background: var(--navy);
+}
+.role-card.selected .rlabel { color: var(--white); }
+.role-card.selected .rsub { color: rgba(255,255,255,.6); }
+.role-icon { font-size: 36px; margin-bottom: 10px; display: block; }
+.rlabel { font-size: 15px; font-weight: 800; color: var(--navy); }
+.rsub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.check {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 20px;
+  height: 20px;
+  background: var(--gold);
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: bold;
+}
+.role-card.selected .check { display: flex; }
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+input {
+  width: 100%;
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 13px 16px;
+  font-family: var(--ff);
+  font-size: 15px;
+  outline: none;
+}
+input:focus {
+  border-color: var(--navy);
+  background: var(--white);
+}
+.btn {
+  width: 100%;
+  border: none;
+  border-radius: 14px;
+  padding: 15px;
+  font-family: var(--ff);
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--navy), #253260);
+  color: var(--white);
+}
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: var(--navy);
+}
+.btn-ghost {
+  background: transparent;
+  border: 1.5px solid #e5e7eb;
+  color: var(--muted);
+}
+.err {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  color: var(--danger);
+  margin-bottom: 14px;
+  display: none;
+}
+.err.show { display: block; }
+.progress {
+  height: 3px;
+  background: #f3f4f6;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--navy), var(--gold));
+  transition: width .4s ease;
+}
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  transition: all .3s;
+}
+.dot.on { background: var(--navy); width: 18px; border-radius: 3px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.captain-scroll { max-height: 55vh; overflow-y: auto; }
+.phone-row { display: flex; gap: 8px; }
+.prefix {
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 13px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+}
 </style>
 </head>
 <body>
@@ -227,7 +241,6 @@
       <div class="dot" id="d3"></div>
     </div>
 
-    <!-- Step 1: Role -->
     <div class="step active" id="step-role">
       <div class="step-title">أنت مين؟ 👋</div>
       <div class="step-sub">اختار دورك عشان نوريلك الشاشة المناسبة</div>
@@ -249,27 +262,22 @@
       <button class="btn btn-primary" onclick="afterRole()">التالي ←</button>
     </div>
 
-    <!-- Step 2: Passenger -->
     <div class="step" id="step-pas">
-      <div class="step-title">بياناتك بسرعة</div>
-      <div class="step-sub">اسمك ورقمك بس وبيدخل</div>
-      <div class="field">
-        <label>الاسم</label>
-        <input type="text" id="pas-name" placeholder="مثال: محمد أحمد"/>
-      </div>
+      <div class="step-title">بيانات الراكب</div>
+      <div class="step-sub">اسمك ورقمك</div>
+      <div class="field"><label>الاسم</label><input type="text" id="pas-name" placeholder="مثال: محمد أحمد"/></div>
       <div class="field">
         <label>رقم التليفون</label>
-        <input type="tel" id="pas-phone" placeholder="01XXXXXXXXX" maxlength="11"/>
+        <div class="phone-row"><div class="prefix">🇪🇬 +20</div><input type="tel" id="pas-phone" placeholder="01XXXXXXXXX" maxlength="11"/></div>
       </div>
       <div id="err-pas" class="err"></div>
       <button class="btn btn-gold" onclick="submitPas()">دخول ←</button>
       <button class="btn btn-ghost" onclick="goTo('step-role',1)">← رجوع</button>
     </div>
 
-    <!-- Step 2: Captain -->
     <div class="step" id="step-cap">
       <div class="step-title">بيانات الكابتن</div>
-      <div class="step-sub">بيانات حقيقية للتحقق منك</div>
+      <div class="step-sub">بيانات حقيقية للتحقق</div>
       <div class="captain-scroll">
         <div class="field"><label>الاسم الكامل</label><input type="text" id="cap-name"/></div>
         <div class="grid2">
@@ -277,15 +285,20 @@
           <div class="field"><label>رقم الرخصة</label><input type="text" id="cap-license"/></div>
         </div>
         <div class="field"><label>الرقم القومي</label><input type="tel" id="cap-nid" maxlength="14"/></div>
-        <div class="field"><label>رقم التليفون</label><input type="tel" id="cap-phone" maxlength="11"/></div>
-        <div class="field"><label>رقم بديل (اختياري)</label><input type="tel" id="cap-phone2" maxlength="11"/></div>
+        <div class="field">
+          <label>رقم التليفون</label>
+          <div class="phone-row"><div class="prefix">🇪🇬 +20</div><input type="tel" id="cap-phone" maxlength="11"/></div>
+        </div>
+        <div class="field">
+          <label>رقم بديل (اختياري)</label>
+          <div class="phone-row"><div class="prefix">🇪🇬 +20</div><input type="tel" id="cap-phone2" maxlength="11"/></div>
+        </div>
       </div>
       <div id="err-cap" class="err"></div>
       <button class="btn btn-primary" onclick="submitCap()">تسجيل الدخول ←</button>
       <button class="btn btn-ghost" onclick="goTo('step-role',1)">← رجوع</button>
     </div>
 
-    <!-- Step 3: Loading -->
     <div class="step" id="step-loading">
       <div style="text-align:center;padding:20px 0">
         <span style="font-size:48px;display:block;margin-bottom:16px;">🏍️</span>
@@ -298,91 +311,6 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCQqqiNQkm-NPGR5XVYkJaM8Li8nqnZYA8",
-    authDomain: "al-warsha.firebaseapp.com",
-    projectId: "al-warsha",
-    storageBucket: "al-warsha.firebasestorage.app",
-    messagingSenderId: "913946656614",
-    appId: "1:913946656614:web:9dad073c3c5664c23a92a7"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-
-  let role = null;
-
-  function goTo(stepId, dotNum) {
-    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-    document.getElementById(stepId).classList.add('active');
-    document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i < dotNum));
-    document.getElementById('progress').style.width = (dotNum * 33) + '%';
-  }
-
-  function selectRole(r) {
-    role = r;
-    document.getElementById('card-pas').classList.toggle('selected', r === 'passenger');
-    document.getElementById('card-cap').classList.toggle('selected', r === 'captain');
-  }
-
-  function afterRole() {
-    if (!role) { document.getElementById('err-role').classList.add('show'); return; }
-    document.getElementById('err-role').classList.remove('show');
-    goTo(role === 'captain' ? 'step-cap' : 'step-pas', 2);
-  }
-
-  function validPhone(p) { return /^01[0-2,5]{1}[0-9]{8}$/.test(p); }
-
-  async function submitPas() {
-    const name = document.getElementById('pas-name').value.trim();
-    const phone = document.getElementById('pas-phone').value.trim();
-    if (!name) return showErr('err-pas', 'اكتب اسمك');
-    if (!validPhone(phone)) return showErr('err-pas', 'رقم التليفون مش صحيح');
-    goTo('step-loading', 3);
-    try {
-      const snap = await db.collection('users').where('phone', '==', phone).where('role', '==', 'passenger').limit(1).get();
-      let uid = snap.empty ? (await db.collection('users').add({ name, phone, role: 'passenger', createdAt: new Date() })).id : snap.docs[0].id;
-      localStorage.setItem('wasselni_uid', uid);
-      localStorage.setItem('wasselni_role', 'passenger');
-      localStorage.setItem('wasselni_name', name);
-      window.location.href = 'passenger.html';
-    } catch(e) { goTo('step-pas',2); showErr('err-pas', 'مشكلة في الاتصال'); }
-  }
-
-  async function submitCap() {
-    const name = document.getElementById('cap-name').value.trim();
-    const plate = document.getElementById('cap-plate').value.trim();
-    const license = document.getElementById('cap-license').value.trim();
-    const nid = document.getElementById('cap-nid').value.trim();
-    const phone = document.getElementById('cap-phone').value.trim();
-    if (!name) return showErr('err-cap', 'الاسم مطلوب');
-    if (!plate) return showErr('err-cap', 'رقم الموتوسيكل مطلوب');
-    if (!license) return showErr('err-cap', 'رقم الرخصة مطلوب');
-    if (!/^\d{14}$/.test(nid)) return showErr('err-cap', 'الرقم القومي 14 رقم');
-    if (!validPhone(phone)) return showErr('err-cap', 'رقم التليفون مش صحيح');
-    goTo('step-loading', 3);
-    try {
-      const snap = await db.collection('users').where('phone', '==', phone).where('role', '==', 'captain').limit(1).get();
-      let uid = snap.empty ? (await db.collection('users').add({ name, plate, license, nid, phone, role: 'captain', isOnline: false, createdAt: new Date() })).id : snap.docs[0].id;
-      localStorage.setItem('wasselni_uid', uid);
-      localStorage.setItem('wasselni_role', 'captain');
-      localStorage.setItem('wasselni_name', name);
-      window.location.href = 'captain.html';
-    } catch(e) { goTo('step-cap',2); showErr('err-cap', 'مشكلة في الاتصال'); }
-  }
-
-  function showErr(id, msg) {
-    const el = document.getElementById(id);
-    el.textContent = msg;
-    el.classList.add('show');
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('wasselni_uid') && localStorage.getItem('wasselni_role')) {
-      window.location.href = localStorage.getItem('wasselni_role') === 'captain' ? 'captain.html' : 'passenger.html';
-    }
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
-  });
-</script>
+<script src="index.js"></script>
 </body>
 </html>
