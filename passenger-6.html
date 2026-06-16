@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<title>وصلني كتامية — راكب</title>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#1a2340"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+<style>
+:root{
+  --navy:#1a2340;--gold:#c8973a;--gold2:#e8b85a;
+  --green:#16a34a;--red:#dc2626;--white:#fff;--muted:#6b7280;
+  --ff:'Cairo',sans-serif;
+  --topbar:52px;--panel:240px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--ff);overflow:hidden;background:#f0ede8}
+
+#map{position:fixed;top:0;left:0;right:0;bottom:var(--panel);z-index:0}
+
+/* ── TOPBAR ── */
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar);z-index:300;background:var(--navy);padding:0 12px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 16px rgba(0,0,0,.35)}
+.tlogo{font-size:15px;font-weight:900;color:#fff;white-space:nowrap}
+.tlogo b{color:var(--gold2)}
+.tright{display:flex;align-items:center;gap:6px}
+.tname{font-size:11px;color:rgba(255,255,255,.65);max-width:70px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.tbadge{background:rgba(200,151,58,.25);border:1px solid rgba(200,151,58,.4);border-radius:999px;padding:2px 8px;font-size:10px;font-weight:700;color:var(--gold2);white-space:nowrap}
+.tlogout{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:4px 8px;color:rgba(255,255,255,.65);font-family:var(--ff);font-size:11px;cursor:pointer;transition:all .2s}
+.tlogout:hover{background:rgba(255,255,255,.2);color:#fff}
+
+/* ── SEARCH BOX ── */
+.searchbar{position:fixed;top:var(--topbar);left:0;right:0;height:58px;z-index:290;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;padding:0 12px;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.1)}
+.s-icon{font-size:18px;flex-shrink:0}
+.s-input{flex:1;border:none;outline:none;font-family:var(--ff);font-size:15px;font-weight:600;color:var(--navy);background:transparent;padding:0}
+.s-input::placeholder{color:#9ca3af;font-weight:400}
+.s-clear{background:none;border:none;font-size:16px;color:#9ca3af;cursor:pointer;padding:4px;display:none}
+.s-clear.show{display:block}
+
+/* ── SUGGESTIONS ── */
+.suggestions{position:fixed;top:calc(var(--topbar) + 58px);left:0;right:0;z-index:280;background:#fff;border-bottom:1px solid #e5e7eb;max-height:200px;overflow-y:auto;box-shadow:0 4px 20px rgba(0,0,0,.12);display:none}
+.suggestions.show{display:block}
+.sug-item{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;border-bottom:1px solid #f9fafb;transition:background .15s}
+.sug-item:hover{background:#f3f4f6}
+.sug-ico{width:34px;height:34px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sug-main{font-size:13px;font-weight:700;color:var(--navy)}
+.sug-sub{font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.sug-msg{padding:14px;text-align:center;font-size:13px;color:var(--muted)}
+
+/* ── PRICE CHIP ── */
+.price-chip{position:fixed;z-index:200;top:calc(var(--topbar) + 70px);left:12px;background:var(--navy);color:#fff;border-radius:12px;padding:8px 14px;box-shadow:0 4px 16px rgba(0,0,0,.25);display:none}
+.price-chip.show{display:block}
+.pc-val{font-size:18px;font-weight:900;color:var(--gold2)}
+.pc-dist{font-size:10px;color:rgba(255,255,255,.6);margin-top:1px}
+.pc-time{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px}
+
+/* ── MAP CONTROLS ── */
+.map-controls{position:fixed;bottom:calc(var(--panel) + 14px);left:12px;z-index:200;display:flex;flex-direction:column;gap:8px}
+.map-btn{width:42px;height:42px;background:#fff;border:none;border-radius:10px;font-size:18px;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.map-btn:hover{transform:scale(1.08)}
+.map-btn:active{transform:scale(.95)}
+
+/* ── THEME TOGGLE ── */
+.theme-toggle{position:fixed;bottom:calc(var(--panel) + 14px);right:12px;z-index:200;width:42px;height:42px;background:#fff;border:none;border-radius:10px;font-size:18px;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.theme-toggle:hover{transform:scale(1.08)}
+
+/* ── PANEL ── */
+.panel{position:fixed;bottom:0;left:0;right:0;height:var(--panel);z-index:250;background:#fff;border-radius:20px 20px 0 0;padding:10px 16px 20px;box-shadow:0 -6px 28px rgba(0,0,0,.15);overflow-y:auto}
+.ph{width:34px;height:4px;background:#e5e7eb;border-radius:2px;margin:0 auto 12px}
+
+.pstate{display:none}
+.pstate.active{display:block;animation:fu .25s ease}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.p-title{font-size:15px;font-weight:900;color:var(--navy);margin-bottom:3px}
+.p-sub{font-size:11px;color:var(--muted);margin-bottom:11px}
+
+.btn-req{width:100%;border:none;border-radius:13px;padding:14px;font-family:var(--ff);font-size:15px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,var(--navy),#2d3f7a);color:#fff;box-shadow:0 5px 20px rgba(26,35,64,.3);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-req:hover{transform:translateY(-2px)}
+.btn-req:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* WAITING */
+.w-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.pulse{width:46px;height:46px;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pulse::before,.pulse::after{content:'';position:absolute;inset:0;border:2px solid var(--gold);border-radius:50%;animation:pr 2s ease-out infinite}
+.pulse::after{animation-delay:-1s}
+@keyframes pr{from{transform:scale(.6);opacity:1}to{transform:scale(2);opacity:0}}
+.w-title{font-size:14px;font-weight:800;color:var(--navy)}
+.w-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.w-timer{font-size:20px;font-weight:900;color:var(--gold);margin-top:2px}
+
+.smsg{border-radius:11px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;gap:9px}
+.smsg.green{background:#f0fdf4;border:1px solid #86efac}
+.smsg.amber{background:#fffbeb;border:1px solid #fcd34d}
+.smsg-ico{font-size:18px;flex-shrink:0}
+.smsg-txt{font-size:12px;font-weight:700;color:var(--navy);line-height:1.4}
+
+/* CAPTAIN CARD */
+.cap-card{background:linear-gradient(135deg,var(--navy),#2d3f7a);border-radius:13px;padding:11px 13px;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cap-av{width:40px;height:40px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.cap-inf{flex:1;min-width:0}
+.cap-nm{font-size:13px;font-weight:800;color:#fff}
+.cap-pl{font-size:10px;color:rgba(255,255,255,.55);margin-top:1px}
+.cap-st{font-size:10px;color:var(--gold2);margin-top:1px}
+.call-btn{width:38px;height:38px;border-radius:50%;background:var(--green);border:none;cursor:pointer;font-size:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(22,163,74,.4);text-decoration:none;transition:transform .2s}
+.call-btn:active{transform:scale(.9)}
+
+.ppill{display:inline-flex;align-items:center;gap:4px;background:rgba(26,35,64,.06);border-radius:7px;padding:4px 9px;font-size:11px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.live-row{display:flex;align-items:center;gap:5px;margin-bottom:8px}
+.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:lp 1.5s infinite;flex-shrink:0}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:.3}}
+.live-txt{font-size:11px;color:var(--muted)}
+
+.btn-cancel{width:100%;border:1.5px solid #e5e7eb;border-radius:11px;padding:10px;font-family:var(--ff);font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:var(--red);transition:all .2s;margin-top:8px}
+.btn-cancel:active{background:#fef2f2}
+
+/* ARRIVED */
+.arr-wrap{text-align:center;padding:4px 0}
+.arr-ico{font-size:44px;display:block;margin-bottom:7px;animation:bnc .6s ease infinite alternate}
+@keyframes bnc{from{transform:translateY(0)}to{transform:translateY(-7px)}}
+.arr-title{font-size:17px;font-weight:900;color:var(--navy)}
+.arr-price{font-size:22px;font-weight:900;color:var(--gold);margin:4px 0}
+.arr-sub{font-size:11px;color:var(--muted);margin-bottom:10px}
+.stars-row{display:flex;justify-content:center;gap:4px;margin-bottom:10px}
+.star-btn{font-size:22px;cursor:pointer;filter:grayscale(1);opacity:.3;transition:all .15s}
+.star-btn.on{filter:none;opacity:1;transform:scale(1.2)}
+.btn-done{width:100%;border:none;border-radius:12px;padding:13px;font-family:var(--ff);font-size:14px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--green),#15803d);color:#fff;box-shadow:0 4px 16px rgba(22,163,74,.3);transition:all .2s}
+.btn-done:active{transform:scale(.97)}
+
+/* TOAST */
+.toast{position:fixed;top:calc(var(--topbar) + 70px);left:50%;transform:translateX(-50%);background:rgba(26,35,64,.92);color:#fff;padding:7px 16px;border-radius:999px;font-size:12px;font-weight:700;z-index:999;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .3s}
+.toast.show{opacity:1}
+
+/* FAVORITES */
+.fav-list{display:flex;gap:8px;margin-bottom:10px;overflow-x:auto;padding:0 4px}
+.fav-btn{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:10px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--navy);cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.fav-btn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* LEAFLET OVERRIDES */
+.leaflet-control-geocoder{background:transparent !important;border:none !important;box-shadow:none !important}
+.leaflet-bar{border-radius:10px !important;box-shadow:0 3px 12px rgba(0,0,0,.2) !important}
+.leaflet-bar a{background:#fff;border-radius:10px !important;color:var(--navy) !important;transition:all .2s !important}
+.leaflet-bar a:hover{background:var(--navy) !important;color:#fff !important}
+
+/* DARK MODE */
+body.dark-mode{--text:#fff;--bg:#1a1a1a}
+body.dark-mode #map{filter:invert(0.93) hue-rotate(180deg)}
+body.dark-mode .leaflet-popup-content-wrapper{background:#2a2a2a;color:#fff}
+body.dark-mode .leaflet-popup-tip{background:#2a2a2a}
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div class="toast" id="toast"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tlogo">🏍️ وصلني <b>كتامية</b></div>
+  <div class="tright">
+    <div class="tname" id="tname"></div>
+    <div class="tbadge" id="rides-count">0 مشوار</div>
+    <button class="tlogout" onclick="logout()">خروج</button>
+  </div>
+</div>
+
+<!-- SEARCH BAR -->
+<div class="searchbar">
+  <span class="s-icon">🔍</span>
+  <input class="s-input" id="s-input" type="text" placeholder="رايح فين؟" autocomplete="off" spellcheck="false" oninput="onSearch(this.value)" onfocus="onSearchFocus()"/>
+  <button class="s-clear" id="s-clear" onclick="clearSearch()">✕</button>
+</div>
+
+<!-- SUGGESTIONS -->
+<div class="suggestions" id="suggestions"></div>
+
+<!-- PRICE CHIP -->
+<div class="price-chip" id="price-chip">
+  <div class="pc-val" id="pc-val">—</div>
+  <div class="pc-dist" id="pc-dist">—</div>
+  <div class="pc-time" id="pc-time">—</div>
+</div>
+
+<!-- MAP CONTROLS -->
+<div class="map-controls">
+  <button class="map-btn" onclick="goToMyLocation()" title="موقعي">📍</button>
+  <button class="map-btn" onclick="toggleRoute()" title="الطريق" id="route-btn" style="display:none">🛣️</button>
+  <button class="map-btn" onclick="toggleStreetView()" title="Street View" id="sv-btn" style="display:none">🏘️</button>
+</div>
+
+<!-- THEME TOGGLE -->
+<button class="theme-toggle" onclick="toggleTheme()" title="تبديل الوضع">🌙</button>
+
+<!-- PANEL -->
+<div class="panel" id="panel">
+  <div class="ph"></div>
+
+  <!-- IDLE -->
+  <div class="pstate active" id="st-idle">
+    <div class="p-title">مرحباً يا <span id="idle-name"></span>! 👋</div>
+    <div class="p-sub">ابحث عن وجهتك فوق ← بعدين اطلب التوصيلة</div>
+    <!-- FAVORITES -->
+    <div class="fav-list" id="fav-list" style="display:none;margin-bottom:10px"></div>
+    <button class="btn-req" id="btn-req" onclick="requestRide()" disabled>🏍️ اطلب توصيلة دلوقتي</button>
+  </div>
+
+  <!-- WAITING -->
+  <div class="pstate" id="st-waiting">
+    <div class="w-row">
+      <div class="pulse"><span style="font-size:22px;position:relative;z-index:1">🔍</span></div>
+      <div>
+        <div class="w-title">بندور على كابتن</div>
+        <div class="w-sub" id="w-dest">جاري البحث…</div>
+        <div class="w-timer" id="w-timer">00:00</div>
+      </div>
+    </div>
+    <div class="smsg amber">
+      <span class="smsg-ico">⏳</span>
+      <span class="smsg-txt">أنت في طريقك لمشوارك — بنلاقيلك أقرب كابتن</span>
+    </div>
+    <button class="btn-cancel" onclick="cancelRide()">إلغاء الطلب</button>
+  </div>
+
+  <!-- ACCEPTED -->
+  <div class="pstate" id="st-accepted">
+    <div class="cap-card">
+      <div class="cap-av">🏍️</div>
+      <div class="cap-inf">
+        <div class="cap-nm" id="cap-nm">—</div>
+        <div class="cap-pl" id="cap-pl">—</div>
+        <div class="cap-st" id="cap-st">★★★★★</div>
+      </div>
+      <a class="call-btn" id="cap-call" href="#">📞</a>
+    </div>
+    <div class="ppill" id="ppill">💰 —</div>
+    <div class="live-row">
+      <div class="live-dot"></div>
+      <span class="live-txt">بيتبع موقع الكابتن</span>
+    </div>
+    <div class="smsg green" id="acc-msg">
+      <span class="smsg-ico">🏍️</span>
+      <span class="smsg-txt" id="acc-txt">الكابتن في الطريق إليك!</span>
+    </div>
+    <button class="btn-cancel" onclick="cancelRide()">إلغاء</button>
+  </div>
+
+  <!-- ARRIVED -->
+  <div class="pstate" id="st-arrived">
+    <div class="arr-wrap">
+      <span class="arr-ico">🎉</span>
+      <div class="arr-title">وصلت بالسلامة!</div>
+      <div class="arr-price" id="arr-price">—</div>
+      <div class="arr-sub">قيّم الكابتن</div>
+      <div class="stars-row">
+        <span class="star-btn" onclick="rate(1)">⭐</span>
+        <span class="star-btn" onclick="rate(2)">⭐</span>
+        <span class="star-btn" onclick="rate(3)">⭐</span>
+        <span class="star-btn" onclick="rate(4)">⭐</span>
+        <span class="star-btn" onclick="rate(5)">⭐</span>
+      </div>
+      <button class="btn-done" onclick="doneRide()">تمام، شكراً! ✓</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+'use strict';
+
+/* SESSION */
+const uid=localStorage.getItem('wasselni_uid'), uname=localStorage.getItem('wasselni_name')||'', uphone=localStorage.getItem('wasselni_phone')||'';
+if(!uid || localStorage.getItem('wasselni_role')!=='passenger') window.location.href='index.html';
+
+document.getElementById('tname').textContent=uname;
+document.getElementById('idle-name').textContent=uname.split(' ')[0];
+
+/* FIREBASE */
+firebase.initializeApp({apiKey:"AIzaSyCQqqiNQkm-NPGR5XVYkJaM8Li8nqnZYA8",authDomain:"al-warsha.firebaseapp.com",databaseURL:"https://al-warsha-default-rtdb.firebaseio.com",projectId:"al-warsha",storageBucket:"al-warsha.firebasestorage.app",messagingSenderId:"913946656614",appId:"1:913946656614:web:9dad073c3c5664c23a92a7"});
+const db=firebase.firestore();
+
+/* MAP */
+let myLat=30.0776, myLng=31.3243;
+const map=L.map('map',{zoomControl:false,attributionControl:false}).setView([myLat,myLng],16);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:['a','b','c']}).addTo(map);
+L.control.zoom({position:'bottomright'}).addTo(map);
+
+/* GEOCODER */
+const geocoder=L.Control.geocoder({defaultMarkGeocode:false, position:'topleft'}).on('markgeocode',e=>{selectPlace(e.geocode)}).addTo(map);
+
+function mkIcon(emoji,sz=36){return L.divIcon({html:`<div style="font-size:${sz}px;line-height:1;filter:drop-shadow(0 2px 5px rgba(0,0,0,.45));text-align:center">${emoji}</div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],className:''});}
+
+let myMk=null,destMk=null,capMk=null,routeLine=null;
+
+function setMyMk(lat,lng){if(myMk)myMk.setLatLng([lat,lng]);else myMk=L.marker([lat,lng],{icon:mkIcon('📍',40),zIndexOffset:1000}).addTo(map);}
+
+function goToMyLocation(){map.setView([myLat,myLng],17);}
+
+/* GPS */
+navigator.geolocation?.getCurrentPosition(pos=>{myLat=pos.coords.latitude;myLng=pos.coords.longitude;setMyMk(myLat,myLng);map.setView([myLat,myLng],17);},err=>{toast('فعّل الـ GPS');},{enableHighAccuracy:true,timeout:10000,maximumAge:0});
+navigator.geolocation?.watchPosition(pos=>{myLat=pos.coords.latitude;myLng=pos.coords.longitude;setMyMk(myLat,myLng);if(currentRideId)db.collection('rides').doc(currentRideId).update({passengerLocation:{lat:myLat,lng:myLng}}).catch(()=>{});},null,{enableHighAccuracy:true,maximumAge:3000});
+
+/* DISTANCE & PRICE */
+function dist(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dG=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dG/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+function getTime(km){return Math.round(km*5)+2;}
+const KM_PRICE=6, MIN=6;
+function price(km){return Math.max(MIN,Math.ceil(km*KM_PRICE));}
+
+/* SEARCH */
+let destLat=null,destLng=null,destName='',stimer=null,results=[];
+
+function onSearch(q){
+  document.getElementById('s-clear').classList.toggle('show',q.length>0);
+  clearDest();
+  clearTimeout(stimer);
+  const sug=document.getElementById('suggestions');
+  if(q.length<2){sug.classList.remove('show');sug.innerHTML='';return;}
+  sug.innerHTML='<div class="sug-msg">🔍 جاري البحث…</div>';
+  sug.classList.add('show');
+  stimer=setTimeout(()=>doSearch(q),400);
+}
+
+function onSearchFocus(){const q=document.getElementById('s-input').value;if(q.length>=2)document.getElementById('suggestions').classList.add('show');}
+
+async function doSearch(q){
+  const sug=document.getElementById('suggestions');
+  try{
+    const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q+'، مصر')}&format=json&limit=6&accept-language=ar`;
+    const r=await fetch(url,{headers:{'User-Agent':'Wasselni/1.0'}});
+    if(!r.ok)throw new Error('Network error');
+    const data=await r.json();
+    results=data;
+    if(!data.length){sug.innerHTML='<div class="sug-msg">🔎 مفيش نتايج</div>';return;}
+    sug.innerHTML=data.map((p,i)=>{const parts=p.display_name.split(',');const name=parts[0].trim();const addr=parts.slice(1,3).join(', ').trim();const ico=getIcon(p);return`<div class="sug-item" onclick="pickPlace(${i})"><div class="sug-ico">${ico}</div><div style="min-width:0"><div class="sug-main">${esc(name)}</div><div class="sug-sub">${esc(addr)}</div></div></div>`;}).join('');
+  }catch(e){console.error(e);sug.innerHTML='<div class="sug-msg">⚠️ مشكلة في الاتصال</div>';}
+}
+
+function getIcon(p){const t=p.type||'',c=p.class||'';if(t==='mosque'||t==='place_of_worship')return'🕌';if(t==='school'||t==='university')return'🏫';if(t==='hospital'||t==='clinic')return'🏥';if(t==='restaurant'||t==='cafe')return'🍽️';if(c==='highway')return'🛣️';if(t==='pharmacy')return'💊';if(t==='supermarket')return'🛒';return'📍';}
+
+function pickPlace(i){
+  const p=results[i];if(!p)return;
+  destLat=parseFloat(p.lat);destLng=parseFloat(p.lon);destName=p.display_name.split(',')[0].trim();
+  document.getElementById('s-input').value=destName;
+  document.getElementById('s-clear').classList.add('show');
+  document.getElementById('suggestions').classList.remove('show');
+  document.getElementById('suggestions').innerHTML='';
+  
+  if(destMk)destMk.remove();
+  destMk=L.marker([destLat,destLng],{icon:mkIcon('🎯',42),zIndexOffset:900}).bindPopup(`<b style="font-family:Cairo,sans-serif;font-size:13px">${esc(destName)}</b>`).addTo(map).openPopup();
+  
+  if(routeLine)routeLine.remove();
+  routeLine=L.polyline([[myLat,myLng],[destLat,destLng]],{color:'#1a2340',weight:3,dashArray:'10 7',opacity:.55}).addTo(map);
+  
+  const panelH=document.getElementById('panel').offsetHeight;
+  map.fitBounds([[myLat,myLng],[destLat,destLng]],{paddingTopLeft:[20,120],paddingBottomRight:[20,panelH+20]});
+  
+  const km=dist(myLat,myLng,destLat,destLng);
+  const p2=price(km);
+  const t=getTime(km);
+  document.getElementById('pc-val').textContent=`${p2} جنيه`;
+  document.getElementById('pc-dist').textContent=`${km.toFixed(1)} كم`;
+  document.getElementById('pc-time').textContent=`${t} د`;
+  document.getElementById('price-chip').classList.add('show');
+  document.getElementById('btn-req').disabled=false;
+  
+  saveFavorite(destName,destLat,destLng);
+  toast(`✅ ${destName}`);
+}
+
+function clearSearch(){
+  document.getElementById('s-input').value='';
+  document.getElementById('s-clear').classList.remove('show');
+  document.getElementById('suggestions').classList.remove('show');
+  document.getElementById('suggestions').innerHTML='';
+  clearDest();
+}
+
+function clearDest(){
+  destLat=null;destLng=null;destName='';
+  if(destMk){destMk.remove();destMk=null;}
+  if(routeLine){routeLine.remove();routeLine=null;}
+  document.getElementById('price-chip').classList.remove('show');
+  document.getElementById('btn-req').disabled=true;
+}
+
+map.on('click',()=>document.getElementById('suggestions').classList.remove('show'));
+
+/* FAVORITES */
+function saveFavorite(name,lat,lng){let favs=JSON.parse(localStorage.getItem('wasselni_favs')||'[]');if(!favs.find(f=>f.lat===lat&&f.lng===lng)){favs.unshift({name,lat,lng});if(favs.length>5)favs.pop();localStorage.setItem('wasselni_favs',JSON.stringify(favs));loadFavorites();}}
+
+function loadFavorites(){
+  const favs=JSON.parse(localStorage.getItem('wasselni_favs')||'[]');
+  const list=document.getElementById('fav-list');
+  if(favs.length){
+    list.innerHTML=favs.map((f,i)=>`<button class="fav-btn" onclick="pickFav(${i})">${f.name.slice(0,12)}</button>`).join('');
+    list.style.display='flex';
+  }
+}
+
+function pickFav(i){
+  const favs=JSON.parse(localStorage.getItem('wasselni_favs')||'[]');
+  const f=favs[i];
+  if(f)pickPlace(results.findIndex(p=>parseFloat(p.lat)===f.lat&&parseFloat(p.lon)===f.lng)||0);
+}
+
+/* STATE */
+let currentRideId=null,waitIv=null,rideLis=null,secs=0,ridePrice=0;
+
+function showSt(id){
+  document.querySelectorAll('.pstate').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+}
+
+/* REQUEST */
+async function requestRide(){
+  if(!destName){toast('اختار وجهة الأول');return;}
+  const km=destLat?dist(myLat,myLng,destLat,destLng):0;
+  ridePrice=price(km);
+  showSt('st-waiting');
+  document.getElementById('w-dest').textContent=`رايح: ${destName}`;
+  startTimer();
+  try{
+    const ref=await db.collection('rides').add({passengerId:uid,passengerName:uname,passengerPhone:uphone,passengerLocation:{lat:myLat,lng:myLng},destName,destLocation:destLat?{lat:destLat,lng:destLng}:null,distKm:parseFloat(km.toFixed(2)),price:ridePrice,status:'pending',captainId:null,captainName:null,captainPlate:null,captainPhone:null,captainLocation:null,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    currentRideId=ref.id;
+    rideLis=db.collection('rides').doc(currentRideId).onSnapshot(snap=>{const d=snap.data();if(!d)return;if(d.status==='accepted')onAccepted(d);if(d.status==='ongoing')onOngoing(d);if(d.status==='done')onDone(d);if(d.status==='cancelled'&&d.cancelledBy==='captain'){cleanup();showSt('st-idle');toast('❌ الكابتن ألغى الرحلة');}if(d.captainLocation){const cl=d.captainLocation;if(capMk)capMk.setLatLng([cl.lat,cl.lng]);else capMk=L.marker([cl.lat,cl.lng],{icon:mkIcon('🏍️',46),zIndexOffset:800}).bindPopup(`<b style="font-family:Cairo,sans-serif">${esc(d.captainName||'الكابتن')}</b>`).addTo(map);}});
+  }catch(e){console.error(e);showSt('st-idle');clearInterval(waitIv);toast('❌ مشكلة في الاتصال');}
+}
+
+function onAccepted(d){
+  clearInterval(waitIv);
+  document.getElementById('cap-nm').textContent=d.captainName||'—';
+  document.getElementById('cap-pl').textContent=d.captainPlate||'—';
+  const avg=d.captainAvgRating;
+  document.getElementById('cap-st').textContent=avg?`${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))} (${avg.toFixed(1)})`:'★★★★★ جديد';
+  if(d.captainPhone){const cb=document.getElementById('cap-call');cb.href=`tel:${d.captainPhone}`;cb.onclick=null;}
+  document.getElementById('ppill').textContent=`💰 ${ridePrice} جنيه`;
+  document.getElementById('acc-txt').textContent='الكابتن في الطريق إليك — أنت في طريقك لمشوارك! 🏍️';
+  document.getElementById('acc-msg').className='smsg green';
+  document.getElementById('route-btn').style.display='flex';
+  document.getElementById('sv-btn').style.display='flex';
+  showSt('st-accepted');
+}
+
+function onOngoing(d){document.getElementById('acc-txt').textContent='أنتوا دلوقتي في الطريق للوجهة 🎯';document.getElementById('acc-msg').className='smsg blue';}
+
+function onDone(d){cleanup();document.getElementById('arr-price').textContent=`${ridePrice} جنيه 💰`;showSt('st-arrived');if(capMk){capMk.remove();capMk=null}clearSearch();loadCount();}
+
+async function cancelRide(){cleanup();if(currentRideId){await db.collection('rides').doc(currentRideId).update({status:'cancelled',cancelledBy:'passenger'}).catch(()=>{});currentRideId=null;}if(capMk){capMk.remove();capMk=null}showSt('st-idle');}
+
+function cleanup(){clearInterval(waitIv);if(rideLis){rideLis();rideLis=null}}
+
+function startTimer(){secs=0;clearInterval(waitIv);waitIv=setInterval(()=>{secs++;const m=String(Math.floor(secs/60)).padStart(2,'0');const s=String(secs%60).padStart(2,'0');document.getElementById('w-timer').textContent=`${m}:${s}`;},1000);}
+
+/* ROUTE & STREET VIEW */
+function toggleRoute(){
+  if(!destLat)return;
+  if(routeLine){routeLine.remove();routeLine=null;document.getElementById('route-btn').style.color='var(--navy)';}
+  else{
+    routeLine=L.polyline([[myLat,myLng],[destLat,destLng]],{color:'#1a2340',weight:3,dashArray:'10 7',opacity:.55}).addTo(map);
+    document.getElementById('route-btn').style.color='var(--gold2)';
+  }
+}
+
+function toggleStreetView(){
+  if(!destLat)return;
+  const url=`https://www.google.com/maps/@${destLat},${destLng},3a,75y,0h,90t/data=!3m5!1e1!3m3!1s`;
+  window.open(url,'_blank');
+}
+
+/* RATING */
+let myRating=0;
+function rate(n){myRating=n;document.querySelectorAll('.star-btn').forEach((s,i)=>s.classList.toggle('on',i<n));}
+
+async function doneRide(){
+  if(currentRideId&&myRating){
+    try{
+      const rs=await db.collection('rides').doc(currentRideId).get();
+      const rd=rs.data();
+      await db.collection('rides').doc(currentRideId).update({passengerRating:myRating});
+      if(rd?.captainId){const cs=await db.collection('users').doc(rd.captainId).get();const cd=cs.data()||{};const tot=(cd.totalRatings||0)+1,sum=(cd.sumRatings||0)+myRating;await db.collection('users').doc(rd.captainId).update({totalRatings:tot,sumRatings:sum,avgRating:parseFloat((sum/tot).toFixed(1))});}
+    }catch(e){console.error(e)}
+  }
+  currentRideId=null;myRating=0;clearSearch();showSt('st-idle');goToMyLocation();
+}
+
+async function loadCount(){
+  try{
+    const today=new Date();today.setHours(0,0,0,0);
+    const snap=await db.collection('rides').where('passengerId','==',uid).where('status','==','done').get();
+    let c=0;
+    snap.forEach(doc=>{const d=doc.data();if(d.createdAt&&d.createdAt.toDate()>=today)c++;});
+    document.getElementById('rides-count').textContent=`${c} مشوار`;
+  }catch(e){}
+}
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500);}
+
+function esc(s){return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function toggleTheme(){document.body.classList.toggle('dark-mode');localStorage.setItem('wasselni-theme',document.body.classList.contains('dark-mode')?'dark':'light');}
+
+function logout(){localStorage.clear();window.location.href='index.html';}
+
+/* ON LOAD */
+window.addEventListener('DOMContentLoaded',async()=>{
+  loadCount();
+  loadFavorites();
+  if(localStorage.getItem('wasselni-theme')==='dark')document.body.classList.add('dark-mode');
+  if(window.visualViewport){window.visualViewport.addEventListener('resize',()=>{const vvh=window.visualViewport.height;const wh=window.innerHeight;const kb=wh-vvh;document.getElementById('panel').style.paddingBottom=kb>100?'8px':'20px';if(kb>100)document.getElementById('suggestions').style.maxHeight='150px';else document.getElementById('suggestions').style.maxHeight='220px';});}
+  try{
+    const snap=await db.collection('rides').where('passengerId','==',uid).where('status','in',['pending','accepted','ongoing']).limit(1).get();
+    if(!snap.empty){currentRideId=snap.docs[0].id;const d=snap.docs[0].data();ridePrice=d.price||0;if(d.destName){document.getElementById('s-input').value=d.destName;destName=d.destName;document.getElementById('btn-req').disabled=false;}if(d.status==='pending'){showSt('st-waiting');startTimer();}if(d.status==='accepted')onAccepted(d);if(d.status==='ongoing')onOngoing(d);rideLis=db.collection('rides').doc(currentRideId).onSnapshot(snap=>{const dd=snap.data();if(!dd)return;if(dd.status==='accepted')onAccepted(dd);if(dd.status==='ongoing')onOngoing(dd);if(dd.status==='done')onDone(dd);if(dd.captainLocation){const cl=dd.captainLocation;if(capMk)capMk.setLatLng([cl.lat,cl.lng]);else capMk=L.marker([cl.lat,cl.lng],{icon:mkIcon('🏍️',46)}).addTo(map);}});}
+  }catch(e){console.error(e)}
+});
+</script>
+</body>
+</html>
