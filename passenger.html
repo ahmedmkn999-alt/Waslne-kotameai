@@ -2,568 +2,127 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
 <title>وصلني كتامية — راكب</title>
-<meta name="mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#1a2340"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
-:root{--navy:#1a2340;--gold:#c8973a;--gold2:#e8b85a;--green:#16a34a;--red:#dc2626;--white:#fff;--muted:#6b7280;--ff:'Cairo',sans-serif}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:var(--ff);overflow:hidden;background:#e8e8e8}
-
-#map{position:fixed;inset:0;z-index:0}
-
-/* TOP BAR */
-.topbar{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--navy);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 20px rgba(0,0,0,.3)}
-.topbar-logo{font-size:17px;font-weight:900;color:#fff}
-.topbar-logo b{color:var(--gold2)}
-.topbar-right{display:flex;align-items:center;gap:8px}
-.topbar-name{font-size:12px;color:rgba(255,255,255,.7)}
-.topbar-rides{background:rgba(200,151,58,.2);border:1px solid rgba(200,151,58,.3);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--gold2)}
-.btn-logout{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:5px 10px;color:rgba(255,255,255,.7);font-family:var(--ff);font-size:11px;cursor:pointer}
-
-/* PANEL */
-.panel{position:fixed;bottom:0;left:0;right:0;z-index:100;background:#fff;border-radius:22px 22px 0 0;padding:10px 18px 28px;box-shadow:0 -8px 40px rgba(0,0,0,.2)}
-.panel-handle{width:36px;height:4px;background:#e5e7eb;border-radius:2px;margin:0 auto 14px}
-.panel-state{display:none}
-.panel-state.active{display:block;animation:fadeUp .3s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-
-/* IDLE */
-.idle-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.idle-title{font-size:17px;font-weight:900;color:var(--navy)}
-.idle-sub{font-size:12px;color:var(--muted);margin-bottom:12px}
-
-/* DESTINATION INPUT */
-.dest-wrap{position:relative;margin-bottom:12px}
-.dest-wrap .dest-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
-.dest-input{width:100%;background:#f3f4f6;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px 40px 12px 14px;font-family:var(--ff);font-size:14px;font-weight:600;color:var(--navy);outline:none;transition:all .2s}
-.dest-input:focus{border-color:var(--navy);background:#fff;box-shadow:0 0 0 3px rgba(26,35,64,.08)}
-.dest-input::placeholder{color:#9ca3af;font-weight:400}
-
-/* PRICE PREVIEW */
-.price-box{background:linear-gradient(135deg,rgba(26,35,64,.04),rgba(200,151,58,.06));border:1px solid rgba(200,151,58,.2);border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;display:none}
-.price-box.show{display:flex}
-.price-label{font-size:12px;color:var(--muted);font-weight:600}
-.price-val{font-size:18px;font-weight:900;color:var(--navy)}
-.price-dist{font-size:11px;color:var(--muted);margin-top:2px}
-
-.btn-request{width:100%;border:none;border-radius:14px;padding:15px;font-family:var(--ff);font-size:16px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,var(--navy),#253260);color:#fff;box-shadow:0 6px 24px rgba(26,35,64,.3);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-request:hover{transform:translateY(-2px)}
-.btn-request:disabled{opacity:.5;cursor:not-allowed;transform:none}
-
-/* WAITING */
-.waiting-anim{display:flex;align-items:center;gap:14px;margin-bottom:14px}
-.pulse-ring{width:54px;height:54px;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.pulse-ring::before,.pulse-ring::after{content:'';position:absolute;inset:0;border:2px solid var(--gold);border-radius:50%;animation:pulseRing 2s ease-out infinite}
-.pulse-ring::after{animation-delay:-1s}
-@keyframes pulseRing{from{transform:scale(.6);opacity:1}to{transform:scale(1.8);opacity:0}}
-.pulse-icon{font-size:26px;position:relative;z-index:1}
-.waiting-title{font-size:16px;font-weight:800;color:var(--navy)}
-.waiting-sub{font-size:12px;color:var(--muted);margin-top:3px}
-.waiting-timer{font-size:24px;font-weight:900;color:var(--gold);margin-top:4px}
-
-/* STATUS MESSAGE */
-.status-msg{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
-.status-msg.warn{background:linear-gradient(135deg,#fffbeb,#fef3c7);border-color:#fcd34d}
-.status-msg-icon{font-size:22px;flex-shrink:0}
-.status-msg-text{font-size:13px;font-weight:700;color:var(--navy);line-height:1.4}
-
-/* CAPTAIN CARD */
-.captain-card{background:linear-gradient(135deg,var(--navy),#253260);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.cap-avatar{width:46px;height:46px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.cap-info{flex:1}
-.cap-name{font-size:15px;font-weight:800;color:#fff}
-.cap-plate{font-size:11px;color:rgba(255,255,255,.6);margin-top:2px}
-.cap-stars{font-size:11px;color:var(--gold2);margin-top:2px}
-.eta-box{background:var(--gold);color:var(--navy);border-radius:8px;padding:5px 10px;text-align:center;flex-shrink:0}
-.eta-num{font-size:16px;font-weight:900}
-.eta-lbl{font-size:9px;font-weight:700;display:block}
-
-/* LIVE TRACK */
-.live-row{display:flex;align-items:center;gap:6px;margin-bottom:10px}
-.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:livePulse 1.5s infinite;flex-shrink:0}
-@keyframes livePulse{0%,100%{opacity:1}50%{opacity:.3}}
-.live-text{font-size:12px;color:var(--muted);font-weight:600}
-
-/* PRICE PILL */
-.price-pill{background:rgba(26,35,64,.06);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;color:var(--navy);display:inline-flex;align-items:center;gap:4px;margin-bottom:10px}
-
-/* ARRIVED */
-.arrived-wrap{text-align:center;padding:8px 0}
-.arrived-icon{font-size:50px;margin-bottom:10px;display:block;animation:bounce .6s ease infinite alternate}
-@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
-.arrived-title{font-size:20px;font-weight:900;color:var(--navy)}
-.arrived-price{font-size:26px;font-weight:900;color:var(--gold);margin:6px 0}
-.arrived-sub{font-size:13px;color:var(--muted);margin-bottom:14px}
-.rating-row{display:flex;justify-content:center;gap:6px;margin-bottom:14px}
-.star-btn{font-size:26px;cursor:pointer;transition:transform .15s;filter:grayscale(1);opacity:.35}
-.star-btn.on{filter:none;opacity:1;transform:scale(1.2)}
-
-/* BTNS */
-.btn-cancel{width:100%;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px;font-family:var(--ff);font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--red);transition:all .2s;margin-top:10px}
-.btn-cancel:hover{border-color:var(--red);background:#fef2f2}
-.btn-done{width:100%;border:none;border-radius:12px;padding:14px;font-family:var(--ff);font-size:15px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--green),#15803d);color:#fff;box-shadow:0 5px 20px rgba(22,163,74,.3);transition:all .2s}
-.btn-done:hover{transform:translateY(-2px)}
-
-/* LOCATE BTN */
-.locate-btn{position:fixed;bottom:230px;left:14px;z-index:200;width:42px;height:42px;background:#fff;border:none;border-radius:10px;font-size:18px;cursor:pointer;box-shadow:0 3px 14px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center}
+:root { --navy: #1a2340; --gold: #c8973a; --green: #16a34a; --white: #fff; --muted: #6b7280; --ff: 'Cairo', sans-serif; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--ff); overflow: hidden; height: 100%; }
+#map { position: fixed; inset: 0; z-index: 0; }
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: var(--navy); padding: 12px 16px;
+  display: flex; justify-content: space-between;
+}
+.topbar-logo span { font-size: 20px; font-weight: 900; color: var(--white); }
+.topbar-logo span b { color: #e8b85a; }
+.btn-logout {
+  background: rgba(255,255,255,.1); border: none;
+  border-radius: 8px; padding: 6px 12px;
+  color: rgba(255,255,255,.7); font-size: 12px; cursor: pointer;
+}
+.panel {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: var(--white); border-radius: 24px 24px 0 0;
+  padding: 12px 20px 30px; max-height: 55vh; overflow-y: auto;
+}
+.panel-state { display: none; }
+.panel-state.active { display: block; }
+.search-box {
+  display: flex; gap: 8px; background: #f9fafb;
+  border: 1.5px solid #e5e7eb; border-radius: 14px;
+  padding: 12px 16px; margin-bottom: 12px;
+}
+.search-box input { flex: 1; border: none; background: transparent; font-family: var(--ff); }
+.search-box button { background: var(--navy); border: none; border-radius: 10px; padding: 6px 12px; color: white; cursor: pointer; }
+.btn-request {
+  width: 100%; background: linear-gradient(135deg, var(--navy), #253260);
+  color: white; border: none; border-radius: 16px;
+  padding: 16px; font-weight: 900; cursor: pointer;
+}
+.waiting-anim { text-align: center; padding: 20px; }
+.waiting-timer { font-size: 28px; font-weight: 900; color: var(--gold); margin-top: 8px; }
+.btn-cancel {
+  width: 100%; border: 1.5px solid #e5e7eb; background: transparent;
+  border-radius: 14px; padding: 13px; color: #dc2626; font-weight: 700; cursor: pointer;
+}
+.captain-card {
+  background: linear-gradient(135deg, var(--navy), #253260);
+  border-radius: 16px; padding: 16px; display: flex; gap: 14px;
+}
+.captain-avatar {
+  width: 52px; height: 52px; background: var(--gold);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+}
+.captain-name { font-size: 16px; font-weight: 800; color: white; }
+.rating-row { display: flex; justify-content: center; gap: 8px; margin: 18px 0; }
+.star-btn { font-size: 28px; cursor: pointer; opacity: .4; }
+.star-btn.on { opacity: 1; }
+.btn-done {
+  width: 100%; background: #16a34a; color: white;
+  border: none; border-radius: 14px; padding: 15px; font-weight: 800; cursor: pointer;
+}
+.locate-btn {
+  position: fixed; bottom: 200px; left: 16px; z-index: 200;
+  width: 46px; height: 46px; background: white;
+  border: none; border-radius: 12px; font-size: 20px; cursor: pointer;
+}
+.toast {
+  position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+  background: var(--navy); color: white; padding: 10px 20px;
+  border-radius: 999px; z-index: 999; display: none;
+}
+.toast.show { display: block; }
 </style>
 </head>
 <body>
 <div id="map"></div>
-
+<div class="toast" id="toast"></div>
 <div class="topbar">
-  <div class="topbar-logo">🏍️ وصلني <b>كتامية</b></div>
-  <div class="topbar-right">
-    <div class="topbar-name" id="topbar-name"></div>
-    <div class="topbar-rides" id="rides-count">0 مشاوير</div>
-    <button class="btn-logout" onclick="logout()">خروج</button>
-  </div>
+  <div class="topbar-logo"><span>🏍️ وصلني <b>كتامية</b></span></div>
+  <button class="btn-logout" onclick="logout()">خروج</button>
 </div>
-
 <button class="locate-btn" onclick="centerMap()">📍</button>
-
 <div class="panel">
   <div class="panel-handle"></div>
-
-  <!-- IDLE -->
   <div class="panel-state active" id="state-idle">
-    <div class="idle-header">
-      <div>
-        <div class="idle-title">مرحباً يا <span id="idle-name"></span>! 👋</div>
-        <div class="idle-sub">اكتب وجهتك واطلب توصيلة</div>
-      </div>
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="اكتب عنوان الوجهة"/>
+      <button onclick="searchLocation()">🔍 بحث</button>
     </div>
-    <div class="dest-wrap">
-      <span class="dest-icon">🎯</span>
-      <input class="dest-input" id="dest-input" type="text" placeholder="رايح فين؟ اكتب المكان…" oninput="onDestInput()"/>
-    </div>
-    <div class="price-box" id="price-box">
-      <div>
-        <div class="price-label">السعر التقريبي</div>
-        <div class="price-dist" id="price-dist-text"></div>
-      </div>
-      <div class="price-val" id="price-val">—</div>
-    </div>
-    <button class="btn-request" id="btn-request" onclick="requestRide()">
-      🏍️ اطلب توصيلة دلوقتي
-    </button>
+    <button class="btn-request" onclick="requestRide()">🏍️ اطلب توصيلة</button>
   </div>
-
-  <!-- WAITING -->
   <div class="panel-state" id="state-waiting">
     <div class="waiting-anim">
-      <div class="pulse-ring"><span class="pulse-icon">🔍</span></div>
-      <div>
-        <div class="waiting-title">بندور على كابتن</div>
-        <div class="waiting-sub" id="waiting-dest-label"></div>
-        <div class="waiting-timer" id="wait-timer">00:00</div>
-      </div>
-    </div>
-    <div class="status-msg warn">
-      <span class="status-msg-icon">⏳</span>
-      <span class="status-msg-text">أنت في طريقك لمشوارك — بنلاقيلك أقرب كابتن متاح</span>
+      <div>🔍 بندور على كابتن...</div>
+      <div class="waiting-timer" id="wait-timer">00:00</div>
     </div>
     <button class="btn-cancel" onclick="cancelRide()">إلغاء الطلب</button>
   </div>
-
-  <!-- ACCEPTED / ON THE WAY -->
   <div class="panel-state" id="state-accepted">
     <div class="captain-card">
-      <div class="cap-avatar">🏍️</div>
-      <div class="cap-info">
-        <div class="cap-name" id="cap-name-display">—</div>
-        <div class="cap-plate" id="cap-plate-display">—</div>
-        <div class="cap-stars" id="cap-stars-display">★★★★★</div>
-      </div>
-      <div class="eta-box">
-        <div class="eta-num" id="eta-val">~3</div>
-        <span class="eta-lbl">دقيقة</span>
-      </div>
-    </div>
-    <div class="status-msg" id="accepted-msg">
-      <span class="status-msg-icon">🏍️</span>
-      <span class="status-msg-text">الكابتن في الطريق إليك — أنت في طريقك لمشوارك!</span>
-    </div>
-    <div class="live-row">
-      <div class="live-dot"></div>
-      <span class="live-text">بيتبع موقع الكابتن مباشرة</span>
-      <span class="price-pill" id="ride-price-pill">💰 —</span>
+      <div class="captain-avatar">🏍️</div>
+      <div><div class="captain-name" id="cap-name">—</div><div id="cap-plate" style="font-size:12px;color:#ccc">—</div></div>
     </div>
     <button class="btn-cancel" onclick="cancelRide()">إلغاء الرحلة</button>
   </div>
-
-  <!-- ARRIVED -->
   <div class="panel-state" id="state-arrived">
-    <div class="arrived-wrap">
-      <span class="arrived-icon">🎉</span>
-      <div class="arrived-title">وصلت بالسلامة!</div>
-      <div class="arrived-price" id="final-price">—</div>
-      <div class="arrived-sub">قيّم الكابتن عشان يتحسن أكتر</div>
-      <div class="rating-row">
-        <span class="star-btn" onclick="rate(1)">⭐</span>
-        <span class="star-btn" onclick="rate(2)">⭐</span>
-        <span class="star-btn" onclick="rate(3)">⭐</span>
-        <span class="star-btn" onclick="rate(4)">⭐</span>
-        <span class="star-btn" onclick="rate(5)">⭐</span>
-      </div>
-      <button class="btn-done" onclick="doneRide()">تمام، شكراً! ✓</button>
-    </div>
+    <div style="text-align:center"><div style="font-size:48px">🎉</div><div class="waiting-timer">وصلت!</div></div>
+    <div class="rating-row"><span class="star-btn" onclick="rate(1)">⭐</span><span class="star-btn" onclick="rate(2)">⭐</span><span class="star-btn" onclick="rate(3)">⭐</span><span class="star-btn" onclick="rate(4)">⭐</span><span class="star-btn" onclick="rate(5)">⭐</span></div>
+    <button class="btn-done" onclick="doneRide()">تمام</button>
   </div>
 </div>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script>
-const uid   = localStorage.getItem('wasselni_uid');
-const uname = localStorage.getItem('wasselni_name');
-const uphone= localStorage.getItem('wasselni_phone');
-if (!uid || localStorage.getItem('wasselni_role') !== 'passenger')
-  window.location.href = 'index.html';
-
-document.getElementById('topbar-name').textContent = uname || '';
-document.getElementById('idle-name').textContent   = (uname||'').split(' ')[0];
-
-firebase.initializeApp({
-  apiKey:"AIzaSyCQqqiNQkm-NPGR5XVYkJaM8Li8nqnZYA8",
-  authDomain:"al-warsha.firebaseapp.com",
-  databaseURL:"https://al-warsha-default-rtdb.firebaseio.com",
-  projectId:"al-warsha",
-  storageBucket:"al-warsha.firebasestorage.app",
-  messagingSenderId:"913946656614",
-  appId:"1:913946656614:web:9dad073c3c5664c23a92a7"
-});
-const db = firebase.firestore();
-
-/* ── MAP ── */
-let myLat=30.0, myLng=31.4;
-const map = L.map('map',{zoomControl:false,attributionControl:false}).setView([myLat,myLng],17);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-
-function makeIcon(emoji,size=36){
-  return L.divIcon({
-    html:`<div style="font-size:${size}px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))">${emoji}</div>`,
-    iconSize:[size,size],iconAnchor:[size/2,size/2],className:''
-  });
-}
-
-let myMarker=null, destMarker=null, captainMarker=null, routeLine=null;
-
-function setMyMarker(lat,lng){
-  if(myMarker) myMarker.setLatLng([lat,lng]);
-  else myMarker=L.marker([lat,lng],{icon:makeIcon('📍',38)}).addTo(map);
-}
-function centerMap(){map.setView([myLat,myLng],17)}
-
-/* ── GPS ── */
-function startGPS(){
-  if(!navigator.geolocation)return;
-  navigator.geolocation.watchPosition(pos=>{
-    myLat=pos.coords.latitude;
-    myLng=pos.coords.longitude;
-    setMyMarker(myLat,myLng);
-    if(currentRideId){
-      db.collection('rides').doc(currentRideId).update({
-        passengerLocation:{lat:myLat,lng:myLng}
-      }).catch(()=>{});
-    }
-  },null,{enableHighAccuracy:true,maximumAge:3000});
-}
-startGPS();
-
-/* ── DISTANCE & PRICE ── */
-function calcDist(lat1,lng1,lat2,lng2){
-  const R=6371;
-  const dLat=(lat2-lat1)*Math.PI/180;
-  const dLng=(lng2-lng1)*Math.PI/180;
-  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-function calcPrice(km){
-  const price=Math.max(5, Math.ceil(km*4));
-  return price;
-}
-
-/* ── DESTINATION INPUT ── */
-let destLat=null, destLng=null, destName='', searchTimeout=null;
-
-function onDestInput(){
-  const q=document.getElementById('dest-input').value.trim();
-  clearTimeout(searchTimeout);
-  document.getElementById('price-box').classList.remove('show');
-  if(destMarker){destMarker.remove();destMarker=null}
-  if(routeLine){routeLine.remove();routeLine=null}
-  destLat=null; destLng=null;
-  if(q.length<3)return;
-  searchTimeout=setTimeout(()=>searchPlace(q),700);
-}
-
-async function searchPlace(q){
-  try{
-    const res=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q+' كتامية مصر')}&format=json&limit=1&accept-language=ar`);
-    const data=await res.json();
-    if(!data.length){
-      // try without village name
-      const res2=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q+' مصر')}&format=json&limit=1&accept-language=ar`);
-      const data2=await res2.json();
-      if(!data2.length)return;
-      setDest(data2[0]);
-    } else {
-      setDest(data[0]);
-    }
-  }catch(e){console.error(e)}
-}
-
-function setDest(place){
-  destLat=parseFloat(place.lat);
-  destLng=parseFloat(place.lon);
-  destName=place.display_name.split(',')[0];
-  document.getElementById('dest-input').value=destName;
-
-  // Marker on map
-  if(destMarker)destMarker.remove();
-  destMarker=L.marker([destLat,destLng],{icon:makeIcon('🎯',38)})
-    .bindPopup(`<b>${destName}</b>`).addTo(map).openPopup();
-
-  // Draw line
-  if(routeLine)routeLine.remove();
-  routeLine=L.polyline([[myLat,myLng],[destLat,destLng]],{
-    color:'#1a2340',weight:3,dashArray:'8 6',opacity:.6
-  }).addTo(map);
-
-  // Fit map
-  map.fitBounds([[myLat,myLng],[destLat,destLng]],{padding:[60,60]});
-
-  // Show price
-  const km=calcDist(myLat,myLng,destLat,destLng);
-  const price=calcPrice(km);
-  document.getElementById('price-dist-text').textContent=`${km.toFixed(1)} كم`;
-  document.getElementById('price-val').textContent=`${price} ج`;
-  document.getElementById('price-box').classList.add('show');
-}
-
-/* ── STATE ── */
-let currentRideId=null, waitInterval=null, rideListener=null, waitSecs=0;
-let ridePrice=0, rideDist=0;
-
-function showState(id){
-  document.querySelectorAll('.panel-state').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-/* ── REQUEST RIDE ── */
-async function requestRide(){
-  const dest=document.getElementById('dest-input').value.trim();
-  if(!dest){
-    document.getElementById('dest-input').focus();
-    document.getElementById('dest-input').style.borderColor='#dc2626';
-    setTimeout(()=>document.getElementById('dest-input').style.borderColor='',2000);
-    return;
-  }
-
-  // Calc price
-  if(destLat&&destLng){
-    rideDist=calcDist(myLat,myLng,destLat,destLng);
-    ridePrice=calcPrice(rideDist);
-  } else {
-    rideDist=0; ridePrice=5;
-  }
-
-  showState('state-waiting');
-  document.getElementById('waiting-dest-label').textContent=`رايح: ${dest}`;
-  startWaitTimer();
-
-  try{
-    const ref=await db.collection('rides').add({
-      passengerId:uid, passengerName:uname, passengerPhone:uphone,
-      passengerLocation:{lat:myLat,lng:myLng},
-      destName:dest,
-      destLocation:destLat?{lat:destLat,lng:destLng}:null,
-      distKm:rideDist.toFixed(2),
-      price:ridePrice,
-      status:'pending',
-      captainId:null, captainName:null, captainPlate:null, captainLocation:null,
-      createdAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-    currentRideId=ref.id;
-    setMyMarker(myLat,myLng);
-
-    rideListener=db.collection('rides').doc(currentRideId).onSnapshot(snap=>{
-      const d=snap.data();
-      if(!d)return;
-      if(d.status==='accepted') onCaptainAccepted(d);
-      if(d.status==='ongoing')  onRideOngoing(d);
-      if(d.status==='done')     onRideDone(d);
-      if(d.status==='cancelled'&&d.cancelledBy==='captain'){
-        cleanup(); showState('state-idle');
-        alert('الكابتن ألغى الرحلة، حاول تاني');
-      }
-      if(d.captainLocation){
-        const cl=d.captainLocation;
-        if(captainMarker) captainMarker.setLatLng([cl.lat,cl.lng]);
-        else captainMarker=L.marker([cl.lat,cl.lng],{icon:makeIcon('🏍️',42)})
-          .bindPopup(`<b>${d.captainName||'الكابتن'}</b>`).addTo(map);
-      }
-    });
-  }catch(e){
-    console.error(e);
-    showState('state-idle');
-    clearInterval(waitInterval);
-  }
-}
-
-function onCaptainAccepted(d){
-  clearInterval(waitInterval);
-  document.getElementById('cap-name-display').textContent=d.captainName||'—';
-  document.getElementById('cap-plate-display').textContent=d.captainPlate||'—';
-  document.getElementById('cap-stars-display').textContent=
-    d.captainRating ? `${'★'.repeat(Math.round(d.captainRating))}${'☆'.repeat(5-Math.round(d.captainRating))} (${d.captainRating.toFixed(1)})` : '★★★★★ جديد';
-  document.getElementById('ride-price-pill').textContent=`💰 ${ridePrice} جنيه`;
-  document.getElementById('accepted-msg').querySelector('.status-msg-text').textContent=
-    `الكابتن في الطريق إليك — أنت في طريقك لمشوارك! 🏍️`;
-  showState('state-accepted');
-}
-
-function onRideOngoing(d){
-  document.getElementById('accepted-msg').innerHTML=`<span class="status-msg-icon">🏁</span><span class="status-msg-text">الكابتن وصل! أنتوا دلوقتي في الطريق للوجهة 🎯</span>`;
-  document.getElementById('accepted-msg').className='status-msg';
-  showState('state-accepted');
-}
-
-function onRideDone(d){
-  cleanup();
-  document.getElementById('final-price').textContent=`${ridePrice} جنيه 💰`;
-  showState('state-arrived');
-  if(captainMarker){captainMarker.remove();captainMarker=null}
-  if(destMarker){destMarker.remove();destMarker=null}
-  if(routeLine){routeLine.remove();routeLine=null}
-  // Update rides counter
-  loadRidesCount();
-}
-
-async function cancelRide(){
-  cleanup();
-  if(currentRideId){
-    await db.collection('rides').doc(currentRideId).update({status:'cancelled',cancelledBy:'passenger'});
-    currentRideId=null;
-  }
-  if(captainMarker){captainMarker.remove();captainMarker=null}
-  showState('state-idle');
-}
-
-function cleanup(){
-  clearInterval(waitInterval);
-  if(rideListener){rideListener();rideListener=null}
-}
-
-/* ── WAIT TIMER ── */
-function startWaitTimer(){
-  waitSecs=0; clearInterval(waitInterval);
-  waitInterval=setInterval(()=>{
-    waitSecs++;
-    const m=String(Math.floor(waitSecs/60)).padStart(2,'0');
-    const s=String(waitSecs%60).padStart(2,'0');
-    document.getElementById('wait-timer').textContent=`${m}:${s}`;
-  },1000);
-}
-
-/* ── RATING ── */
-let myRating=0;
-function rate(n){
-  myRating=n;
-  document.querySelectorAll('.star-btn').forEach((s,i)=>s.classList.toggle('on',i<n));
-}
-
-async function doneRide(){
-  if(currentRideId&&myRating){
-    // Save rating + update captain avg
-    const rideSnap=await db.collection('rides').doc(currentRideId).get();
-    const rideData=rideSnap.data();
-    await db.collection('rides').doc(currentRideId).update({passengerRating:myRating});
-    // Update captain rating avg
-    if(rideData&&rideData.captainId){
-      const capSnap=await db.collection('users').doc(rideData.captainId).get();
-      const capData=capSnap.data()||{};
-      const totalRatings=(capData.totalRatings||0)+1;
-      const sumRatings=(capData.sumRatings||0)+myRating;
-      const avgRating=sumRatings/totalRatings;
-      await db.collection('users').doc(rideData.captainId).update({
-        totalRatings, sumRatings, avgRating:parseFloat(avgRating.toFixed(1))
-      });
-    }
-  }
-  currentRideId=null; myRating=0;
-  // Reset destination
-  document.getElementById('dest-input').value='';
-  document.getElementById('price-box').classList.remove('show');
-  showState('state-idle');
-  centerMap();
-}
-
-/* ── RIDES COUNT ── */
-async function loadRidesCount(){
-  try{
-    const today=new Date(); today.setHours(0,0,0,0);
-    const snap=await db.collection('rides')
-      .where('passengerId','==',uid)
-      .where('status','==','done')
-      .get();
-    // Count today's rides from all done rides
-    const todayTs=firebase.firestore.Timestamp.fromDate(today);
-    let count=0;
-    snap.forEach(doc=>{
-      const d=doc.data();
-      if(d.createdAt&&d.createdAt.toDate()>=today) count++;
-    });
-    document.getElementById('rides-count').textContent=`${count} مشاوير`;
-  }catch(e){}
-}
-
-/* ── LOGOUT ── */
-function logout(){
-  localStorage.clear();
-  window.location.href='index.html';
-}
-
-/* ── ON LOAD ── */
-window.addEventListener('DOMContentLoaded',async()=>{
-  loadRidesCount();
-  // Check active ride
-  try{
-    const snap=await db.collection('rides')
-      .where('passengerId','==',uid)
-      .where('status','in',['pending','accepted','ongoing'])
-      .limit(1).get();
-    if(!snap.empty){
-      currentRideId=snap.docs[0].id;
-      const d=snap.docs[0].data();
-      ridePrice=d.price||0;
-      if(d.status==='pending'){showState('state-waiting');startWaitTimer();}
-      if(d.status==='accepted') onCaptainAccepted(d);
-      if(d.status==='ongoing')  onRideOngoing(d);
-      rideListener=db.collection('rides').doc(currentRideId).onSnapshot(snap=>{
-        const dd=snap.data();
-        if(!dd)return;
-        if(dd.status==='accepted') onCaptainAccepted(dd);
-        if(dd.status==='ongoing')  onRideOngoing(dd);
-        if(dd.status==='done')     onRideDone(dd);
-        if(dd.captainLocation){
-          const cl=dd.captainLocation;
-          if(captainMarker) captainMarker.setLatLng([cl.lat,cl.lng]);
-          else captainMarker=L.marker([cl.lat,cl.lng],{icon:makeIcon('🏍️',42)}).addTo(map);
-        }
-      });
-    }
-  }catch(e){console.error(e)}
-});
-</script>
+<script src="passenger.js"></script>
 </body>
 </html>
